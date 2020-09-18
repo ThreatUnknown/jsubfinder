@@ -1,4 +1,4 @@
-module github.com/hiddengearz/JSubfinder
+module github.com/hiddengearz/jsubfinder
 
 go 1.13
 
