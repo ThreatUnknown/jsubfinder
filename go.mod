@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/coocood/freecache v1.1.1 // indirect
 	github.com/jpillora/go-tld v1.0.0
-	github.com/klauspost/compress v1.10.11 // indirect
+	github.com/klauspost/compress v1.11.0 // indirect
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
 	github.com/microcosm-cc/bluemonday v1.0.4 // indirect
 	github.com/miekg/dns v1.1.31 // indirect
