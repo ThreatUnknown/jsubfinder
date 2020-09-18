@@ -2,11 +2,13 @@ package core
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"regexp"
 	"regexp/syntax"
+
+	"gopkg.in/yaml.v2"
+
 	//"strconv"
 	"strings"
 )
@@ -14,6 +16,7 @@ import (
 var ConfigSigs ConfigSignature
 var Signatures []Signature
 var Blacklisted_extensions []string
+var FindSecrets bool
 
 type ConfigSignature struct {
 	Signatures []struct {
@@ -27,7 +30,7 @@ type ConfigSignature struct {
 
 func (config *ConfigSignature) ParseConfig(fileName string) {
 	if fileExists(fileName) {
-		fmt.Println("Parsing " + fileName)
+		//fmt.Println("Parsing " + fileName)
 
 		yamlFile, err := ioutil.ReadFile(fileName)
 		if err != nil {

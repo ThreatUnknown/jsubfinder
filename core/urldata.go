@@ -50,7 +50,7 @@ func NewURLData(u string) (data UrlData) {
 	}
 	data.UrlAddr.tld = u2.Domain + "." + u2.TLD
 
-	if !NoCrawl {
+	if Crawl {
 		data.JSFiles = data.GetJSLinks()
 	}
 
@@ -108,10 +108,12 @@ func NewURLData(u string) (data UrlData) {
 		}
 	}
 
-	for i, _ = range data.JSFiles {
-		if data.JSFiles[i].Content != "" {
-			for _, sig := range Signatures {
-				data.JSFiles[i].secrets = append(data.JSFiles[i].secrets, sig.Match(&data.JSFiles[i])...)
+	if FindSecrets {
+		for i, _ = range data.JSFiles {
+			if data.JSFiles[i].Content != "" {
+				for _, sig := range Signatures {
+					data.JSFiles[i].secrets = append(data.JSFiles[i].secrets, sig.Match(&data.JSFiles[i])...)
+				}
 			}
 		}
 	}

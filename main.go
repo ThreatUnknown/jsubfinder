@@ -14,9 +14,9 @@ import (
 )
 
 func main() {
-	//if Debug {
-	defer core.TimeTrack(time.Now(), "JSubfinder took ")
-	//}
+	if core.Debug {
+		defer core.TimeTrack(time.Now(), "JSubfinder")
+	}
 
 	core.ConfigSigs.ParseConfig("signatures.yaml") //https://github.com/eth0izzle/shhgit/blob/090e3586ee089f013659e02be16fd0472b629bc7/core/signatures.go
 	core.Signatures = core.ConfigSigs.GetSignatures()
@@ -32,7 +32,8 @@ func main() {
 	urlFlag := flag.String("u", "", "Url address to scan")
 	flag.BoolVar(&core.Debug, "d", false, "Enable Debug mode")
 	outputFlag := flag.String("o", "", "Output results to this file")
-	flag.BoolVar(&core.NoCrawl, "nc", false, "No Crawling")
+	flag.BoolVar(&core.Crawl, "crawl", false, "Crawl")
+	flag.BoolVar(&core.FindSecrets, "s", false, "Search for secrets")
 
 	flag.Parse()
 

@@ -16,7 +16,7 @@ var Greedy = false
 
 //Debug enables or disables debug mode
 var Debug = false
-var NoCrawl = false
+var Crawl = false
 
 //RadFile reads the content of a file and returns it in a slice
 func ReadFile(filePath string) []string {

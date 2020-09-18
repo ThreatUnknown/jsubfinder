@@ -55,7 +55,7 @@ func Exec(urls []string, concurrency int, outputFile string) {
 					fmt.Println("\t\tsecret: " + secret)
 					_, found := Find(newSecrets, secret)
 					if !found {
-						newSecrets = append(newSecrets, secret)
+						newSecrets = append(newSecrets, secret+" of "+js.UrlAddr.string)
 					}
 				}
 			}
@@ -73,7 +73,7 @@ func Exec(urls []string, concurrency int, outputFile string) {
 				for _, secret := range js.secrets {
 					_, found := Find(newSecrets, secret)
 					if !found {
-						newSecrets = append(newSecrets, secret)
+						newSecrets = append(newSecrets, secret+" of "+js.UrlAddr.string)
 					}
 				}
 			}
