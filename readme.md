@@ -8,6 +8,7 @@ This tool is still in active development thus hasn't been refactored and has alo
 
 ```
 ▶ go get -u github.com/hiddengearz/jsubfinder
+wget https://raw.githubusercontent.com/hiddengearz/jsubfinder/master/.jsf_signatures.yaml && mv .jsf_signatures.yaml ~/.jsf_signatures.yaml
 ```
 
 ## Basic Usage
@@ -65,6 +66,7 @@ flag          | Description
 -u            | single url address to scan
 -o            | file to output subdomains to. If secrets is enabled it's output file will be abreviated with secret_
 -crawl        | Enable the basic crawler
+-sig          | Location of signature file, by default ~/.jsf_signatures.yaml
 -d            | Enable debug mode
 -g            | Enables greedy regex which scans all urls and not just JS files. This is disabled by default but will likely be enabled by default in the future
 -s            | Enable secrets (beta), can result in alot of false positives.

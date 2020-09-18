@@ -4,9 +4,11 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 
 	core "github.com/hiddengearz/JSubfinder/core"
+	"github.com/mitchellh/go-homedir"
 
 	//"strconv"
 	"strings"
@@ -18,13 +20,13 @@ func main() {
 		defer core.TimeTrack(time.Now(), "JSubfinder")
 	}
 
-	core.ConfigSigs.ParseConfig("signatures.yaml") //https://github.com/eth0izzle/shhgit/blob/090e3586ee089f013659e02be16fd0472b629bc7/core/signatures.go
-	core.Signatures = core.ConfigSigs.GetSignatures()
-	core.Blacklisted_extensions = []string{".exe", ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".psd", ".xcf", ".zip", ".tar.gz", ".ttf", ".lock"}
-	//fmt.Println("compiled signatures: " + strconv.Itoa(len(core.Signatures)))
-	//return
+	home, err := homedir.Dir()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	var urls []string
+	var sig string
 
 	concurrencyFlag := flag.Int("c", 10, "Concurrency")
 	fileFlag := flag.String("f", "", "File with urls")
@@ -34,8 +36,15 @@ func main() {
 	outputFlag := flag.String("o", "", "Output results to this file")
 	flag.BoolVar(&core.Crawl, "crawl", false, "Crawl")
 	flag.BoolVar(&core.FindSecrets, "s", false, "Search for secrets")
+	flag.StringVar(&sig, "sig", home+"/.jsf_signatures.yaml", "Location of signatures")
 
 	flag.Parse()
+
+	core.ConfigSigs.ParseConfig(sig) //https://github.com/eth0izzle/shhgit/blob/090e3586ee089f013659e02be16fd0472b629bc7/core/signatures.go
+	core.Signatures = core.ConfigSigs.GetSignatures()
+	core.Blacklisted_extensions = []string{".exe", ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".psd", ".xcf", ".zip", ".tar.gz", ".ttf", ".lock"}
+	//fmt.Println("compiled signatures: " + strconv.Itoa(len(core.Signatures)))
+	//return
 
 	if core.IsFlagPassed("f") && core.IsFlagPassed("u") {
 		fmt.Println("Provide either -f or -u, you can't provide both")

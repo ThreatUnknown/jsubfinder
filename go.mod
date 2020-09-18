@@ -9,6 +9,7 @@ require (
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
 	github.com/microcosm-cc/bluemonday v1.0.4 // indirect
 	github.com/miekg/dns v1.1.31 // indirect
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/projectdiscovery/gologger v1.0.1 // indirect
 	github.com/projectdiscovery/httpx v1.0.2 // indirect
 	github.com/valyala/fasthttp v1.16.0
