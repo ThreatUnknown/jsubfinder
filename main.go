@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	core "github.com/hiddengearz/JSubfinder/core"
+	core "github.com/hiddengearz/jsubfinder/core"
 	"github.com/mitchellh/go-homedir"
 
 	//"strconv"
