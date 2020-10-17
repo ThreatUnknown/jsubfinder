@@ -38,7 +38,7 @@ play.google.com
 ### With Secrets Enabled
 
 ```
-▶ echo www.youtube.com | ./jsubfinder -s -o youtube.com
+▶ echo www.youtube.com | ./jsubfinder -s
 www.youtube.com
 youtubei.youtube.com
 payments.youtube.com
@@ -49,8 +49,6 @@ tv.youtube.com
 music.youtube.com
 creatoracademy.youtube.com
 artists.youtube.com
-
-▶ cat secrets_youtube.com
 Google Cloud API Key AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8 found in content of https://www.youtube.com
 Google Cloud API Key AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8 found in content of https://www.youtube.com
 Google Cloud API Key AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8 found in content of https://www.youtube.com
