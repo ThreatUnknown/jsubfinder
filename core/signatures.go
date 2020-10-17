@@ -17,6 +17,7 @@ var ConfigSigs ConfigSignature
 var Signatures []Signature
 var Blacklisted_extensions []string
 var FindSecrets bool
+var PrintSecrets bool = false
 
 type ConfigSignature struct {
 	Signatures []struct {

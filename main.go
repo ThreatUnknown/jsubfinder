@@ -44,6 +44,9 @@ func main() {
 		core.ConfigSigs.ParseConfig(sig) //https://github.com/eth0izzle/shhgit/blob/090e3586ee089f013659e02be16fd0472b629bc7/core/signatures.go
 		core.Signatures = core.ConfigSigs.GetSignatures()
 		core.Blacklisted_extensions = []string{".exe", ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".psd", ".xcf", ".zip", ".tar.gz", ".ttf", ".lock"}
+		if *outputFlag == "" {
+			core.PrintSecrets = true
+		}
 	}
 	//fmt.Println("compiled signatures: " + strconv.Itoa(len(core.Signatures)))
 	//return
