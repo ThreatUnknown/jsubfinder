@@ -7,7 +7,7 @@ This tool is still in active development thus hasn't been refactored and has alo
 ## Install
 
 ```
-▶ go get -u github.com/hiddengearz/jsubfinder
+▶ go install github.com/hiddengearz/jsubfinder@latest
 wget https://raw.githubusercontent.com/hiddengearz/jsubfinder/master/.jsf_signatures.yaml && mv .jsf_signatures.yaml ~/.jsf_signatures.yaml
 ```
 
