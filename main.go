@@ -1,20 +1,14 @@
 package main
 
-import (
-	"bufio"
-	"flag"
-	"fmt"
-	"log"
-	"os"
+import "github.com/hiddengearz/jsubfinder/cmd"
 
-	core "github.com/hiddengearz/jsubfinder/core"
-	"github.com/mitchellh/go-homedir"
+//"strconv"
 
-	//"strconv"
-	"strings"
-	"time"
-)
+func main() {
+	cmd.Execute()
+}
 
+/*
 func main() {
 	if core.Debug {
 		defer core.TimeTrack(time.Now(), "JSubfinder")
@@ -70,3 +64,4 @@ func main() {
 	core.Exec(urls, *concurrencyFlag, *outputFlag)
 
 }
+*/
