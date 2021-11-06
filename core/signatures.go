@@ -3,10 +3,10 @@ package core
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"regexp"
 	"regexp/syntax"
 
+	l "github.com/hiddengearz/jsubfinder/core/logger"
 	"gopkg.in/yaml.v2"
 
 	//"strconv"
@@ -47,7 +47,7 @@ func (config *ConfigSignature) ParseConfig(fileName string) {
 		//fmt.Printf("Result: %v\n", config)
 
 	} else {
-		log.Fatal(fileName + "doesn't exist")
+		l.Log.Fatal(fileName + "doesn't exist")
 		return
 	}
 

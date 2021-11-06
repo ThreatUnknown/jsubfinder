@@ -6,7 +6,11 @@ import (
 	"sync"
 )
 
+var Urls []string
+
 func Exec(urls []string, concurrency int, outputFile string) {
+
+	//fmt.Print(Urls)
 	var data []UrlData
 	var wg = sync.WaitGroup{}
 	maxGoroutines := concurrency

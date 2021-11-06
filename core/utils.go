@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	l "github.com/hiddengearz/jsubfinder/core/logger"
 )
 
 var Greedy = false
@@ -27,7 +29,7 @@ func ReadFile(filePath string) []string {
 	var content []string
 
 	if err != nil {
-		log.Fatal(err)
+		l.Log.Fatal(err)
 		return nil
 	}
 	defer file.Close()
