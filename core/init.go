@@ -6,9 +6,21 @@ import (
 	"sync"
 )
 
-var Urls []string
+var (
+	Urls        []string
+	Threads     int
+	InputFile   string
+	Url         string
+	OutputFile  string
+	Greedy      bool
+	Debug       bool
+	Crawl       bool
+	FindSecrets bool
+	Sig         string
+	Silent      bool
+)
 
-func Exec(urls []string, concurrency int, outputFile string) {
+func ExecSearch(concurrency int, outputFile string) {
 
 	//fmt.Print(Urls)
 	var data []UrlData
@@ -16,8 +28,8 @@ func Exec(urls []string, concurrency int, outputFile string) {
 	maxGoroutines := concurrency
 	guard := make(chan struct{}, maxGoroutines)
 
-	results := make(chan UrlData, len(urls))
-	for _, url := range urls {
+	results := make(chan UrlData, len(Urls))
+	for _, url := range Urls {
 		guard <- struct{}{}
 		wg.Add(1)
 		go func(url string) {
@@ -38,7 +50,6 @@ func Exec(urls []string, concurrency int, outputFile string) {
 		}
 	}
 
-	saveresults := IsFlagPassed("o")
 	var newSubdomains []string
 	var newSecrets []string
 	if Debug {
@@ -91,10 +102,8 @@ func Exec(urls []string, concurrency int, outputFile string) {
 		}
 	}
 
-	if saveresults {
+	if outputFile != "" {
 		SaveResults(outputFile, newSubdomains)
-	}
-	if saveresults {
 		SaveResults("secrets_"+outputFile, newSecrets)
 	}
 }
