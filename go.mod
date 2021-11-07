@@ -4,12 +4,13 @@ go 1.13
 
 require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
+	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/coocood/freecache v1.1.1 // indirect
 	github.com/jpillora/go-tld v1.1.1
 	github.com/klauspost/compress v1.13.3 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
-	github.com/microcosm-cc/bluemonday v1.0.15 // indirect
+	github.com/microcosm-cc/bluemonday v1.0.16 // indirect
 	github.com/miekg/dns v1.1.31 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/projectdiscovery/gologger v1.0.1 // indirect
