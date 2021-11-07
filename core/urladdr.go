@@ -2,10 +2,10 @@ package core
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
+	l "github.com/hiddengearz/jsubfinder/core/logger"
 	"github.com/valyala/fasthttp"
 )
 
@@ -31,9 +31,7 @@ func (u *UrlAddr) GetContent(client *fasthttp.Client) (err error, newContent str
 
 		err = client.Do(req, resp)
 		if err != nil {
-			if Debug {
-				fmt.Printf("Client get failed: %s\n", err)
-			}
+			l.Log.Debug("Client get failed: %s\n", err)
 			return
 		}
 
@@ -42,24 +40,18 @@ func (u *UrlAddr) GetContent(client *fasthttp.Client) (err error, newContent str
 
 		err = client.Do(req, resp)
 		if err != nil && !strings.Contains(string(err.Error()), "no such host") {
-			if Debug {
-				fmt.Printf("new err Client get failed: %s\n", err)
-			}
+			l.Log.Debug("new err Client get failed: %s\n", err)
 			req.SetRequestURI("http://" + u.string)
 
 			err = client.Do(req, resp)
 			if err != nil {
-				if Debug {
-					fmt.Printf("Client get failed: %s\n", err)
-				}
+				l.Log.Debug("Client get failed: %s\n", err)
 				return
 			}
 			err = errors.New("http")
 
 		} else if err != nil {
-			if Debug {
-				fmt.Printf("Client get failed: %s\n", err)
-			}
+			l.Log.Debug("Client get failed: %s\n", err)
 			return
 		} else {
 			err = errors.New("https")

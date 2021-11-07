@@ -11,26 +11,10 @@ import (
 
 var (
 	rootCmd = &cobra.Command{
-		Use:   "Laelap",
+		Use:   "JSubFinder",
 		Short: "Agent for the [redacted] project",
 		Long:  `[redacted]`,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			f, err := os.OpenFile("log.info", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-			if err != nil {
-				l.Log.Error(err)
-			}
-
-			if C.Debug && C.Silent {
-				l.Log.Fatal("Please choose Debug mode or silent mode. Not both.")
-			} else if C.Debug {
-
-				l.InitDetailedLogger(f)
-				l.Log.SetLevel(logrus.DebugLevel)
-
-				l.Log.Debug("Debug mode enabled")
-			} else if C.Silent {
-				l.Log.SetLevel(logrus.PanicLevel)
-			}
 
 		},
 	}
@@ -57,6 +41,22 @@ func Execute() error {
 
 //Things to check before running any code.
 func safetyChecks() {
+	f, err := os.OpenFile("log.info", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		l.Log.Error(err)
+	}
+
+	if C.Debug && C.Silent {
+		l.Log.Fatal("Please choose Debug mode or silent mode. Not both.")
+	} else if C.Debug {
+
+		l.InitDetailedLogger(f)
+		l.Log.SetLevel(logrus.DebugLevel)
+
+		l.Log.Debug("Debug mode enabled")
+	} else if C.Silent {
+		l.Log.SetLevel(logrus.PanicLevel)
+	}
 
 	//Check if we can write to the outputFile
 	if C.OutputFile != "" {

@@ -2,13 +2,13 @@ package core
 
 import (
 	"crypto/tls"
-	"fmt"
 	"log"
 	"regexp"
 	"strings"
 	"sync"
 	"time"
 
+	l "github.com/hiddengearz/jsubfinder/core/logger"
 	tld "github.com/jpillora/go-tld"
 	"github.com/valyala/fasthttp"
 )
@@ -32,14 +32,10 @@ func NewURLData(u string) (data UrlData) {
 	err, data.Content = data.UrlAddr.GetContent(client)
 	if err != nil && err.Error() == "https" {
 		data.UrlAddr.string = "https://" + u
-		if Debug {
-			fmt.Println("Adding https to " + u)
-		}
+		l.Log.Debug("Adding https to " + u)
 	} else if err != nil && err.Error() == "http" {
 		data.UrlAddr.string = "http://" + u
-		if Debug {
-			fmt.Println("Adding http to " + u)
-		}
+		l.Log.Debug("Adding http to " + u)
 	} else if err != nil {
 		return
 	}
@@ -57,9 +53,7 @@ func NewURLData(u string) (data UrlData) {
 	if strings.Contains(data.Content, "<script") || strings.Contains(data.Content, "/script") {
 		data.JSFiles = append(data.JSFiles, JSData{data.UrlAddr, data.Content, nil, nil}) //Add the base url to JSFiles as there may be inline JS
 	} else {
-		if Debug {
-			fmt.Println("no script tags in: " + data.UrlAddr.string)
-		}
+		l.Log.Debug("no script tags in: " + data.UrlAddr.string)
 	}
 
 	var wg = sync.WaitGroup{}

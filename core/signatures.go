@@ -112,15 +112,11 @@ func (s *SimpleSignature) Match(data *JSData) (secrets []string) {
 
 		if strings.Contains(data.UrlAddr.string, s.match) {
 			secrets = append(secrets, s.name+" "+s.match+" found in URL")
-			if Debug {
-				fmt.Println(s.name + " " + s.match + " found within URL of " + data.UrlAddr.string)
-			}
+			l.Log.Debug(s.name + " " + s.match + " found within URL of " + data.UrlAddr.string)
 		}
 		if strings.Contains(data.Content, s.match) {
 			secrets = append(secrets, s.name+" "+s.match+" found in content")
-			if Debug {
-				fmt.Println(s.name + " " + s.match + " found in content of " + data.UrlAddr.string)
-			}
+			l.Log.Debug(s.name + " " + s.match + " found in content of " + data.UrlAddr.string)
 		}
 
 		return secrets
@@ -146,18 +142,14 @@ func (s *PatternSignature) Match(data *JSData) (secrets []string) {
 			tmp := s.match.FindAllString(data.UrlAddr.string, -1)
 			for _, secret := range tmp {
 				secrets = append(secrets, s.name+" "+secret+" found in URL")
-				if Debug {
-					fmt.Println(s.name + " " + secret + " found within URL of " + data.UrlAddr.string)
-				}
+				l.Log.Debug(s.name + " " + secret + " found within URL of " + data.UrlAddr.string)
 			}
 		}
 		if s.match.MatchString(data.Content) {
 			tmp := s.match.FindAllString(data.Content, -1)
 			for _, secret := range tmp {
 				secrets = append(secrets, s.name+" "+secret+" found in content")
-				if Debug {
-					fmt.Println(s.name + " " + secret + " found within content of " + data.UrlAddr.string)
-				}
+				l.Log.Debug(s.name + " " + secret + " found within content of " + data.UrlAddr.string)
 			}
 		}
 	}
