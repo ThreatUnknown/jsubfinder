@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"os"
 
 	C "github.com/hiddengearz/jsubfinder/core"
@@ -32,6 +33,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&C.FindSecrets, "secrets", "s", false, "Check results for secrets e.g api keys")
 	rootCmd.PersistentFlags().BoolVarP(&C.Silent, "silent", "S", false, "Enable Silent mode")
 	rootCmd.PersistentFlags().StringVar(&C.Sig, "sig", "~/.jsf_signatures.yaml", "Location of signatures for finding secrets")
+	rootCmd.PersistentFlags().BoolVarP(&C.SSL, "nossl", "K", true, "Skip SSL cert verification")
 
 }
 
@@ -40,15 +42,15 @@ func Execute() error {
 }
 
 //Things to check before running any code.
-func safetyChecks() {
+func safetyChecks() error {
 	f, err := os.OpenFile("log.info", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
-		l.Log.Error(err)
+		return (err)
 	}
 
 	if C.Debug && C.Silent {
-		l.Log.Fatal("Please choose Debug mode or silent mode. Not both.")
-	} else if C.Debug {
+		return errors.New("Please choose Debug mode or silent mode. Not both.")
+	} else if C.Debug { //Setup logging
 
 		l.InitDetailedLogger(f)
 		l.Log.SetLevel(logrus.DebugLevel)
@@ -63,7 +65,7 @@ func safetyChecks() {
 		file, err := os.OpenFile(C.OutputFile, os.O_WRONLY, 0666)
 		if err != nil {
 			if os.IsPermission(err) {
-				l.Log.Fatal(err)
+				return (err)
 			}
 
 		}
@@ -71,14 +73,20 @@ func safetyChecks() {
 	}
 
 	//Ensure you don't provide both url and input file
-	if C.InputFile != "" && C.Url != "" {
-		l.Log.Fatal("Provide either -f or -u, you can't provide both")
+	if C.InputFile != "" && len(C.InputURLs) != 0 {
+		return errors.New("Provide either -f or -u, you can't provide both")
 	}
 
 	//ensure signature file exists
 	if C.FindSecrets {
-		C.ConfigSigs.ParseConfig(C.Sig) //https://github.com/eth0izzle/shhgit/blob/090e3586ee089f013659e02be16fd0472b629bc7/core/signatures.go
-		C.Signatures = C.ConfigSigs.GetSignatures()
+		err := C.ConfigSigs.ParseConfig(C.Sig) //https://github.com/eth0izzle/shhgit/blob/090e3586ee089f013659e02be16fd0472b629bc7/core/signatures.go
+		if err != nil {
+			return err
+		}
+		C.Signatures, err = C.ConfigSigs.GetSignatures()
+		if err != nil {
+			return err
+		}
 		C.Blacklisted_extensions = []string{".exe", ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".psd", ".xcf", ".zip", ".tar.gz", ".ttf", ".lock"}
 		if C.Silent == true {
 			C.PrintSecrets = false
@@ -91,6 +99,8 @@ func safetyChecks() {
 
 	//ensure output is being sent to console or outputfile.
 	if C.Silent && C.OutputFile == "" {
-		l.Log.Fatal("If you aren't saving the output with -o and you want the display silenced -S, what's the point of running JSubfinder?")
+		return errors.New("If you aren't saving the output with -o and you want the display silenced -S, what's the point of running JSubfinder?")
 	}
+
+	return nil
 }

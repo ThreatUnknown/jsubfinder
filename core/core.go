@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"strconv"
 	"sync"
+
+	l "github.com/hiddengearz/jsubfinder/core/logger"
 )
 
 var (
-	Urls        []string
+	InputURLs   []string
 	Threads     int
 	InputFile   string
-	Url         string
 	OutputFile  string
 	Greedy      bool
 	Debug       bool
@@ -18,23 +19,25 @@ var (
 	FindSecrets bool
 	Sig         string
 	Silent      bool
+	SSL         bool = false
 )
 
-func ExecSearch(concurrency int, outputFile string) {
+func ExecSearch(concurrency int, outputFile string) error {
 
 	//fmt.Print(Urls)
-	var data []UrlData
+	var data []WebPage
 	var wg = sync.WaitGroup{}
 	maxGoroutines := concurrency
 	guard := make(chan struct{}, maxGoroutines)
 
-	results := make(chan UrlData, len(Urls))
-	for _, url := range Urls {
+	//Start a go routine and start fetching results
+	results := make(chan WebPage, len(InputURLs))
+	for _, url := range InputURLs {
 		guard <- struct{}{}
 		wg.Add(1)
 		go func(url string) {
 
-			results <- NewURLData(url)
+			results <- GetResults(url)
 			<-guard
 			wg.Done()
 		}(url)
@@ -103,7 +106,14 @@ func ExecSearch(concurrency int, outputFile string) {
 	}
 
 	if outputFile != "" {
-		SaveResults(outputFile, newSubdomains)
+		err := SaveResults(outputFile, newSubdomains)
+		if err != nil {
+			l.Log.Error(err)
+		}
 		SaveResults("secrets_"+outputFile, newSecrets)
+		if err != nil {
+			l.Log.Error(err)
+		}
 	}
+	return nil
 }

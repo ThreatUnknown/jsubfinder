@@ -10,8 +10,8 @@ import (
 )
 
 type UrlAddr struct {
-	string
-	tld string
+	string        //URL address
+	tld    string //Top Level Domain of the URL
 }
 
 //GetContent retrieves the content of urls - #### MAYBE CHECK FOR redirects and follow them????

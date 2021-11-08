@@ -1,6 +1,9 @@
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	l "github.com/hiddengearz/jsubfinder/core/logger"
+	"github.com/spf13/cobra"
+)
 
 //Start JSubFiner in proxy mode
 var proxyExec = &cobra.Command{
@@ -11,6 +14,9 @@ var proxyExec = &cobra.Command{
 
 	},
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		safetyChecks()
+		err := safetyChecks()
+		if err != nil {
+			l.Log.Fatal(err)
+		}
 	},
 }

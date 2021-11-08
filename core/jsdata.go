@@ -8,21 +8,21 @@ import (
 	l "github.com/hiddengearz/jsubfinder/core/logger"
 )
 
-type JSData struct {
+type JavaScript struct {
 	UrlAddr
-	Content    string
-	subdomains []string
-	secrets    []string
+	Content    string   //Content of the JS file
+	subdomains []string //Subdomains found in content of JavaScript
+	secrets    []string //Secrets found content of JavaScript
 }
 
 //GetSubDomains uses regex to find subdomains in the content of JS files
-func (js *JSData) GetSubDomains() error {
+func (js *JavaScript) GetSubDomains() error {
 	if Debug {
 		defer TimeTrack(time.Now(), "GetSubDomains "+js.UrlAddr.string)
 	}
 	domainRegex, err := regexp.Compile("([a-zA-Z0-9][a-zA-Z0-9-]*\\." + js.UrlAddr.tld + ")")
 	if err != nil {
-		l.Log.Error(err)
+		l.Log.Debug(err)
 		return err
 	}
 	results := domainRegex.FindAllStringSubmatch(js.Content, -1)

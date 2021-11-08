@@ -2,19 +2,21 @@ package cmd
 
 import (
 	"bufio"
+	"errors"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/hiddengearz/jsubfinder/core"
 	C "github.com/hiddengearz/jsubfinder/core"
+	l "github.com/hiddengearz/jsubfinder/core/logger"
 	"github.com/spf13/cobra"
 )
 
 func init() {
 	//rootCmd.AddCommand(cmdExec)
 	searchExec.PersistentFlags().StringVarP(&C.InputFile, "inputFile", "f", "", "File containing domains")
-	searchExec.PersistentFlags().StringVarP(&C.Url, "url", "u", "", "Url to check")
+	searchExec.PersistentFlags().StringSliceVarP(&C.InputURLs, "url", "u", []string{}, "Url to check")
 
 }
 
@@ -24,9 +26,15 @@ var searchExec = &cobra.Command{
 	Short: "Search javascript/URL's for domains",
 	Long:  `Execute the command specified`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		err := safetyChecks()
+		if err != nil {
+			l.Log.Fatal(err)
+		}
 
-		safetyChecks()
-		getURLs()
+		err = getURLs()
+		if err != nil {
+			l.Log.Fatal(err)
+		}
 	},
 	Run: func(cmd *cobra.Command, arguments []string) {
 		if C.Debug {
@@ -37,15 +45,20 @@ var searchExec = &cobra.Command{
 }
 
 //Retrieve the URL's needed to be searched
-func getURLs() {
-	if C.Url != "" { //if -u isn't empty
-		core.Urls = append(C.Urls, C.Url)
+func getURLs() (err error) {
+	if len(C.InputURLs) != 0 { //if -u isn't empty
+		return
 	} else if C.InputFile != "" { //else if -f isn't empty
-		core.Urls = core.ReadFile(C.InputFile)
-	} else { //finally try from input being piped
+		core.InputURLs, err = core.ReadFile(C.InputFile)
+		return
+	} else if stat, _ := os.Stdin.Stat(); (stat.Mode() & os.ModeCharDevice) == 0 { //finally try from input being piped
 		sc := bufio.NewScanner(os.Stdin)
 		for sc.Scan() {
-			core.Urls = append(core.Urls, strings.ToLower(sc.Text()))
+			core.InputURLs = append(core.InputURLs, strings.ToLower(sc.Text()))
 		}
+		return
+	} else {
+		return errors.New("No URL's provided")
 	}
+
 }
