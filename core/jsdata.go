@@ -39,3 +39,13 @@ func (js *JavaScript) GetSubDomains() error {
 	return nil
 
 }
+
+func (js *JavaScript) GetSecrets() error {
+	if Debug {
+		defer TimeTrack(time.Now(), "GetSecrets "+js.UrlAddr.string)
+	}
+	for _, sig := range Signatures {
+		js.secrets = append(js.secrets, sig.Match(js)...)
+	}
+	return nil
+}

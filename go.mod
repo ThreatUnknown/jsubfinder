@@ -3,8 +3,10 @@ module github.com/hiddengearz/jsubfinder
 go 1.13
 
 require (
+	github.com/elazarl/goproxy v0.0.0-20210801061803-8e322dfb79c4
 	github.com/jpillora/go-tld v1.1.1
 	github.com/kr/pretty v0.3.0 // indirect
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/rogpeppe/go-internal v1.8.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.2.1

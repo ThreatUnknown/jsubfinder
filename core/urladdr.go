@@ -8,6 +8,7 @@ import (
 	"time"
 
 	l "github.com/hiddengearz/jsubfinder/core/logger"
+	tld "github.com/jpillora/go-tld"
 )
 
 type UrlAddr struct {
@@ -83,5 +84,15 @@ func (u *UrlAddr) GetContent(client *http.Client) (err error, newContent string)
 
 	newContent = (string(bodyBytes))
 
+	return
+}
+
+func (u *UrlAddr) GetTLD() (err error) {
+	u2, err := tld.Parse(u.string)
+	if err != nil {
+		return
+	}
+
+	u.tld = u2.Domain + "." + u2.TLD
 	return
 }

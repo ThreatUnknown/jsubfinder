@@ -10,7 +10,6 @@ import (
 	"time"
 
 	l "github.com/hiddengearz/jsubfinder/core/logger"
-	tld "github.com/jpillora/go-tld"
 )
 
 type WebPage struct {
@@ -42,12 +41,10 @@ func GetResults(url string) (wp WebPage) {
 		return
 	}
 
-	u2, err2 := tld.Parse(wp.UrlAddr.string)
-	if err2 != nil {
+	err = wp.UrlAddr.GetTLD()
+	if err != nil {
 		return
 	}
-
-	wp.UrlAddr.tld = u2.Domain + "." + u2.TLD
 
 	if Crawl {
 		wp.JSFiles, err = wp.GetJSLinks()
@@ -114,8 +111,9 @@ func GetResults(url string) (wp WebPage) {
 	if FindSecrets {
 		for i, _ = range wp.JSFiles {
 			if wp.JSFiles[i].Content != "" {
-				for _, sig := range Signatures {
-					wp.JSFiles[i].secrets = append(wp.JSFiles[i].secrets, sig.Match(&wp.JSFiles[i])...)
+				err := wp.JSFiles[i].GetSecrets()
+				if err != nil {
+					l.Log.Debug(err)
 				}
 			}
 		}

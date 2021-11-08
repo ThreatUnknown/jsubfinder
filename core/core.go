@@ -9,17 +9,19 @@ import (
 )
 
 var (
-	InputURLs   []string
-	Threads     int
-	InputFile   string
-	OutputFile  string
-	Greedy      bool
-	Debug       bool
-	Crawl       bool
-	FindSecrets bool
-	Sig         string
-	Silent      bool
-	SSL         bool = false
+	InputURLs    []string
+	Threads      int
+	InputFile    string
+	OutputFile   string
+	Greedy       bool
+	Debug        bool
+	Crawl        bool
+	FindSecrets  bool
+	Sig          string
+	Silent       bool
+	SSL          bool = false
+	LocalPort    int
+	UpsteamProxy string
 )
 
 func ExecSearch(concurrency int, outputFile string) error {

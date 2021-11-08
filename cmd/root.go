@@ -6,6 +6,7 @@ import (
 
 	C "github.com/hiddengearz/jsubfinder/core"
 	l "github.com/hiddengearz/jsubfinder/core/logger"
+	"github.com/mitchellh/go-homedir"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -32,7 +33,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&C.Crawl, "crawl", "c", false, "Enable crawling")
 	rootCmd.PersistentFlags().BoolVarP(&C.FindSecrets, "secrets", "s", false, "Check results for secrets e.g api keys")
 	rootCmd.PersistentFlags().BoolVarP(&C.Silent, "silent", "S", false, "Enable Silent mode")
-	rootCmd.PersistentFlags().StringVar(&C.Sig, "sig", "~/.jsf_signatures.yaml", "Location of signatures for finding secrets")
+	rootCmd.PersistentFlags().StringVar(&C.Sig, "sig", "", "Location of signatures for finding secrets")
 	rootCmd.PersistentFlags().BoolVarP(&C.SSL, "nossl", "K", true, "Skip SSL cert verification")
 
 }
@@ -79,6 +80,14 @@ func safetyChecks() error {
 
 	//ensure signature file exists
 	if C.FindSecrets {
+		if C.Sig == "" {
+			home, err := homedir.Dir()
+			if err != nil {
+				return errors.New("Unable to find homedir, please provide the location of the signature fil with -sig")
+			}
+			C.Sig = home + "/.jsf_signatures.yaml"
+		}
+
 		err := C.ConfigSigs.ParseConfig(C.Sig) //https://github.com/eth0izzle/shhgit/blob/090e3586ee089f013659e02be16fd0472b629bc7/core/signatures.go
 		if err != nil {
 			return err
@@ -90,6 +99,8 @@ func safetyChecks() error {
 		C.Blacklisted_extensions = []string{".exe", ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".psd", ".xcf", ".zip", ".tar.gz", ".ttf", ".lock"}
 		if C.Silent == true {
 			C.PrintSecrets = false
+		} else {
+			C.PrintSecrets = true
 		}
 	}
 

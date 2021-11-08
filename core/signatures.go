@@ -46,7 +46,7 @@ func (config *ConfigSignature) ParseConfig(fileName string) error {
 		//fmt.Printf("Result: %v\n", config)
 
 	} else {
-		return errors.New(fileName + "doesn't exist")
+		return errors.New(fileName + " doesn't exist")
 	}
 	return nil
 
