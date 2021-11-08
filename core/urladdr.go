@@ -2,11 +2,12 @@ package core
 
 import (
 	"errors"
+	"io/ioutil"
+	"net/http"
 	"strings"
 	"time"
 
 	l "github.com/hiddengearz/jsubfinder/core/logger"
-	"github.com/valyala/fasthttp"
 )
 
 type UrlAddr struct {
@@ -15,51 +16,72 @@ type UrlAddr struct {
 }
 
 //GetContent retrieves the content of urls - #### MAYBE CHECK FOR redirects and follow them????
-func (u *UrlAddr) GetContent(client *fasthttp.Client) (err error, newContent string) {
+func (u *UrlAddr) GetContent(client *http.Client) (err error, newContent string) {
+	var req *http.Request
+	var resp *http.Response
 	if Debug {
 		defer TimeTrack(time.Now(), "GetContent "+u.string)
 	}
-	req := fasthttp.AcquireRequest()
-	resp := fasthttp.AcquireResponse()
-	defer fasthttp.ReleaseRequest(req)   // <- do not forget to release
-	defer fasthttp.ReleaseResponse(resp) // <- do not forget to release
 
-	req.Header.Set("User-agent", "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0")
 	if strings.HasPrefix(u.string, "https://") || strings.HasPrefix(u.string, "http://") {
 
-		req.SetRequestURI(u.string)
+		req, err = http.NewRequest(http.MethodGet, u.string, nil)
+		if err != nil {
+			l.Log.Debug("Client get failed: %s\n", err)
+			return
+		}
 
-		err = client.Do(req, resp)
+		req.Header.Set("User-agent", "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0")
+
+		resp, err = client.Do(req)
 		if err != nil {
 			l.Log.Debug("Client get failed: %s\n", err)
 			return
 		}
 
 	} else {
-		req.SetRequestURI("https://" + u.string)
 
-		err = client.Do(req, resp)
-		if err != nil && !strings.Contains(string(err.Error()), "no such host") {
+		//Do request with HTTP://
+		req, err = http.NewRequest(http.MethodGet, "http://"+u.string, nil)
+		if err != nil {
+			l.Log.Debug("Client get failed: %s\n", err)
+			return
+		}
+
+		req.Header.Set("User-agent", "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0")
+
+		resp, err = client.Do(req)
+		if err != nil && !strings.Contains(string(err.Error()), "no such host") { //if there is an error and its not due to dns
 			l.Log.Debug("new err Client get failed: %s\n", err)
-			req.SetRequestURI("http://" + u.string)
 
-			err = client.Do(req, resp)
+			req, err = http.NewRequest(http.MethodGet, "https://"+u.string, nil) //try with https
 			if err != nil {
 				l.Log.Debug("Client get failed: %s\n", err)
 				return
 			}
-			err = errors.New("http")
+
+			resp, err = client.Do(req)
+			if err != nil {
+				l.Log.Debug("Client get failed: %s\n", err)
+				return
+			}
+			u.string = "https://" + u.string
 
 		} else if err != nil {
 			l.Log.Debug("Client get failed: %s\n", err)
 			return
 		} else {
+			u.string = "http://" + u.string
 			err = errors.New("https")
 		}
 	}
+	defer resp.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
 
-	bodyBytes := resp.Body()
 	newContent = (string(bodyBytes))
 
-	return err, newContent
+	return
 }

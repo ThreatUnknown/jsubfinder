@@ -32,7 +32,7 @@ func (js *JavaScript) GetSubDomains() error {
 			tmp := result[1]
 			tmp = strings.Replace(tmp, "u002F", "", -1)
 
-			l.Log.Debug("Replacing " + result[1] + " with " + tmp + " due to likely false positive u002F in url")
+			//l.Log.Debug("Replacing " + result[1] + " with " + tmp + " due to likely false positive u002F in url")
 			js.subdomains = append(js.subdomains, tmp)
 		}
 	}

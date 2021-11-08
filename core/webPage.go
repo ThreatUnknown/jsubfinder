@@ -3,6 +3,7 @@ package core
 import (
 	"crypto/tls"
 	"log"
+	"net/http"
 	"regexp"
 	"strings"
 	"sync"
@@ -10,7 +11,6 @@ import (
 
 	l "github.com/hiddengearz/jsubfinder/core/logger"
 	tld "github.com/jpillora/go-tld"
-	"github.com/valyala/fasthttp"
 )
 
 type WebPage struct {
@@ -26,8 +26,10 @@ func GetResults(url string) (wp WebPage) {
 	var err error
 
 	wp.UrlAddr.string = url
-	client := &fasthttp.Client{
-		TLSConfig: &tls.Config{InsecureSkipVerify: SSL},
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: SSL},
+		},
 	}
 	err, wp.Content = wp.UrlAddr.GetContent(client)
 	if err != nil && err.Error() == "https" {
@@ -42,8 +44,9 @@ func GetResults(url string) (wp WebPage) {
 
 	u2, err2 := tld.Parse(wp.UrlAddr.string)
 	if err2 != nil {
-		log.Fatal(err)
+		return
 	}
+
 	wp.UrlAddr.tld = u2.Domain + "." + u2.TLD
 
 	if Crawl {
