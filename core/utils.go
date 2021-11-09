@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -34,6 +36,15 @@ func ReadFile(filePath string) (content []string, err error) {
 
 	if err := scanner.Err(); err != nil {
 		return content, err
+	}
+
+	return
+}
+
+func ReadFileIntoBytes(filePath string) (content []byte, err error) {
+	content, err = ioutil.ReadFile(filePath) // b has type []byte
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	return
@@ -102,4 +113,14 @@ func fileExists(filename string) bool {
 		return false
 	}
 	return !info.IsDir()
+}
+
+//folderExists returns a bool if the folder exists or not
+func folderExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		l.Log.Debug(err)
+		return false
+	}
+	return info.IsDir()
 }

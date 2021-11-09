@@ -27,7 +27,14 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 	if Debug {
 		proxy.Verbose = true
 	}
+	GenerateCert()
+	if err != nil {
+		l.Log.Fatal(err)
+	}
+
 	proxy.OnRequest().HandleConnect(goproxy.AlwaysMitm)
+	//goproxy.GoproxyCa
+	//goproxy.GoproxyCa.PrivateKey
 
 	proxy.OnResponse().DoFunc(func(r *http.Response, ctx *goproxy.ProxyCtx) *http.Response {
 		fmt.Printf("received request to", r.Request.URL.String())

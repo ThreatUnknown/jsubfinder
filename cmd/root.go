@@ -83,7 +83,8 @@ func safetyChecks() error {
 		if C.Sig == "" {
 			home, err := homedir.Dir()
 			if err != nil {
-				return errors.New("Unable to find homedir, please provide the location of the signature fil with -sig")
+				l.Log.Debug("Unable to find homedir, please provide the location of the signature fil with -sig")
+				return err
 			}
 			C.Sig = home + "/.jsf_signatures.yaml"
 		}
