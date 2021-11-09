@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/elazarl/goproxy"
 	l "github.com/hiddengearz/jsubfinder/core/logger"
@@ -26,9 +27,10 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 	if Debug {
 		proxy.Verbose = true
 	}
+	proxy.OnRequest().HandleConnect(goproxy.AlwaysMitm)
 
 	proxy.OnResponse().DoFunc(func(r *http.Response, ctx *goproxy.ProxyCtx) *http.Response {
-		fmt.Println("received request to", r.Request.URL.String())
+		fmt.Printf("received request to", r.Request.URL.String())
 
 		var result JavaScript
 		result.UrlAddr.string = r.Request.URL.String()
@@ -41,8 +43,10 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 		}
 
 		result.Content = string(bodyBytes)
-
-		ParseProxyResponse(result)
+		go func() {
+			ParseProxyResponse(result)
+			time.Sleep(2 * time.Second)
+		}()
 		return r
 	})
 
