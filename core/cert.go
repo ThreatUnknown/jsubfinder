@@ -74,6 +74,7 @@ func GenerateCert() (err error) {
 	}
 
 	return nil
+
 }
 
 func ParseCertAndKey(certPEM, keyPEM []byte) (*x509.Certificate, *rsa.PrivateKey, error) {
