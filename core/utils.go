@@ -106,7 +106,7 @@ func SaveResults(fileLocation string, newContent []string) error {
 }
 
 //fileExists returns a bool if the file exists or not
-func fileExists(filename string) bool {
+func FileExists(filename string) bool {
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {
 		l.Log.Debug(err)
@@ -116,7 +116,7 @@ func fileExists(filename string) bool {
 }
 
 //folderExists returns a bool if the folder exists or not
-func folderExists(filename string) bool {
+func FolderExists(filename string) bool {
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {
 		l.Log.Debug(err)

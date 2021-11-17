@@ -1,9 +1,11 @@
 package core
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -14,6 +16,10 @@ import (
 
 var newSubdomains []string
 var newSecrets []string
+var SSHFolder string
+var Certificate string
+var Key string
+var X509pair tls.Certificate
 
 func StartProxy(port string, upsteamProxySet bool) (err error) {
 	proxy := goproxy.NewProxyHttpServer()
@@ -27,14 +33,26 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 	if Debug {
 		proxy.Verbose = true
 	}
-	GenerateCert()
+
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: true,
+		GetCertificate:     returnCert,
+	}
+
+	X509pair, err = tls.LoadX509KeyPair(Certificate, Key)
 	if err != nil {
-		l.Log.Fatal(err)
+		log.Fatalf("Unable to load certificate %s: %v", Certificate, err)
+	}
+	tlsConfig.Certificates = append(tlsConfig.Certificates, X509pair)
+
+	// Not strictly required but appears to help with SNI
+	tlsConfig.BuildNameToCertificate()
+
+	goproxy.MitmConnect.TLSConfig = func(host string, ctx *goproxy.ProxyCtx) (*tls.Config, error) {
+		return tlsConfig, nil
 	}
 
 	proxy.OnRequest().HandleConnect(goproxy.AlwaysMitm)
-	//goproxy.GoproxyCa
-	//goproxy.GoproxyCa.PrivateKey
 
 	proxy.OnResponse().DoFunc(func(r *http.Response, ctx *goproxy.ProxyCtx) *http.Response {
 		fmt.Printf("received request to", r.Request.URL.String())

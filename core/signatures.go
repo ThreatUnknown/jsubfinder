@@ -29,7 +29,7 @@ type ConfigSignature struct {
 }
 
 func (config *ConfigSignature) ParseConfig(fileName string) error {
-	if fileExists(fileName) {
+	if FileExists(fileName) {
 		//fmt.Println("Parsing " + fileName)
 
 		yamlFile, err := ioutil.ReadFile(fileName)
