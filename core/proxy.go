@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"crypto/tls"
 	"errors"
 	"fmt"
@@ -8,7 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"time"
+	"strings"
 
 	"github.com/elazarl/goproxy"
 	l "github.com/hiddengearz/jsubfinder/core/logger"
@@ -36,7 +37,7 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: true,
-		GetCertificate:     returnCert,
+		//GetCertificate:     returnCert,
 	}
 
 	X509pair, err = tls.LoadX509KeyPair(Certificate, Key)
@@ -55,22 +56,38 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 	proxy.OnRequest().HandleConnect(goproxy.AlwaysMitm)
 
 	proxy.OnResponse().DoFunc(func(r *http.Response, ctx *goproxy.ProxyCtx) *http.Response {
-		fmt.Printf("received request to", r.Request.URL.String())
+
+		//fmt.Println("received request to", r.Request.URL.String())
 
 		var result JavaScript
+
+		if !Greedy && !strings.HasSuffix(r.Request.URL.String(), ".js") {
+			return r
+		}
+
 		result.UrlAddr.string = r.Request.URL.String()
 
-		defer r.Body.Close()
 		bodyBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			l.Log.Debug(errors.New("Failed to read body of " + result.UrlAddr.string))
-			return r
+			return nil
 		}
+
+		r.Body = ioutil.NopCloser(bytes.NewReader([]byte(string(bodyBytes))))
+		//fmt.Println(r.Body)
+
+		//r.Body.Close()
+
+		//fmt.Println(string(bodyBytes))
+
+		result.Content = string(bodyBytes)
+		//fmt.Println(string(bodyBytes))
+		//os.Exit(1)
 
 		result.Content = string(bodyBytes)
 		go func() {
 			ParseProxyResponse(result)
-			time.Sleep(2 * time.Second)
+			//time.Sleep(2 * time.Second)
 		}()
 		return r
 	})
@@ -83,7 +100,13 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 }
 
 func ParseProxyResponse(js JavaScript) {
-	err := js.GetSubDomains()
+	err := js.UrlAddr.GetTLD()
+	if err != nil {
+		l.Log.Debug(err)
+		return
+	}
+
+	err = js.GetSubDomains()
 	if err != nil {
 		l.Log.Debug(err)
 		return
@@ -99,7 +122,7 @@ func ParseProxyResponse(js JavaScript) {
 	for _, subdomain := range js.subdomains {
 		_, found := Find(newSubdomains, subdomain)
 		if !found {
-			fmt.Println(subdomain)
+			fmt.Println("Subdomain: " + subdomain)
 			newSubdomains = append(newSubdomains, subdomain)
 		}
 	}

@@ -62,6 +62,7 @@ var proxyExec = &cobra.Command{
 				log.Fatal(err)
 			}
 		}
+		C.ReadCertificateDisk(C.Certificate, C.Key)
 
 	},
 }
