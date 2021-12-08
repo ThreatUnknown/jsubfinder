@@ -26,11 +26,11 @@ func init() {
 	l.Log = logrus.New()
 	rootCmd.AddCommand(searchExec)
 	rootCmd.AddCommand(proxyExec)
-	rootCmd.PersistentFlags().IntVarP(&C.Threads, "threads", "t", 5, "Ammount of threads to be used")
+	rootCmd.PersistentFlags().IntVarP(&C.Threads, "threads", "t", 5, "Ammount of threads to be used") //Are these used in proxy? Mv to search
 	rootCmd.PersistentFlags().StringVarP(&C.OutputFile, "outputFile", "o", "", "name/location to store the file")
-	rootCmd.PersistentFlags().BoolVarP(&C.Greedy, "greedy", "g", false, "Check all files for URL's not just Javascript")
+	rootCmd.PersistentFlags().BoolVarP(&C.Greedy, "greedy", "g", false, "Check all files for URL's not just Javascript") //Are these used in proxy? Mv to search
 	rootCmd.PersistentFlags().BoolVarP(&C.Debug, "debug", "d", false, "Enable debug mode. Logs are stored in log.info")
-	rootCmd.PersistentFlags().BoolVarP(&C.Crawl, "crawl", "c", false, "Enable crawling")
+	rootCmd.PersistentFlags().BoolVarP(&C.Crawl, "crawl", "c", false, "Enable crawling") //Are these used in proxy? Mv to search
 	rootCmd.PersistentFlags().BoolVarP(&C.FindSecrets, "secrets", "s", false, "Check results for secrets e.g api keys")
 	rootCmd.PersistentFlags().BoolVarP(&C.Silent, "silent", "S", false, "Enable Silent mode")
 	rootCmd.PersistentFlags().StringVar(&C.Sig, "sig", "", "Location of signatures for finding secrets")

@@ -83,8 +83,9 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 		//fmt.Println(string(bodyBytes))
 
 		result.Content = string(bodyBytes)
-		//fmt.Println(string(bodyBytes))
-		//os.Exit(1)
+		if result.Content == "" {
+			return r
+		}
 
 		contenType := r.Header.Get("Content-Type")
 
@@ -131,6 +132,8 @@ func ParseProxyResponse(js JavaScript) {
 		if !found {
 			fmt.Println("Subdomain: " + subdomain)
 			newSubdomains = append(newSubdomains, subdomain)
+
+			//########################## ADD WRITE TO FILE https://codereview.stackexchange.com/questions/209870/writing-to-a-file-in-golang-across-concurrent-go-routines
 		}
 	}
 	for _, secret := range js.secrets {
