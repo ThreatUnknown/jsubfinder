@@ -14,7 +14,7 @@ var (
 	InputFile    string
 	OutputFile   string
 	Greedy       bool
-	Debug        bool
+	Debug        bool = false
 	Crawl        bool
 	FindSecrets  bool
 	Sig          string
@@ -32,7 +32,7 @@ func ExecSearch(concurrency int, outputFile string) error {
 	maxGoroutines := concurrency
 	guard := make(chan struct{}, maxGoroutines)
 
-	//Start a go routine and start fetching results
+	//Start a go routine and start fetching results for each URL provided
 	results := make(chan WebPage, len(InputURLs))
 	for _, url := range InputURLs {
 		guard <- struct{}{}
@@ -60,7 +60,7 @@ func ExecSearch(concurrency int, outputFile string) error {
 	if Debug {
 		for _, url := range data {
 			fmt.Println("url: " + url.UrlAddr.string)
-			fmt.Println("\ttld: " + url.UrlAddr.tld)
+			fmt.Println("\trootDomain: " + url.UrlAddr.rootDomain)
 			for _, js := range url.JSFiles {
 				fmt.Println("\tjs: " + js.UrlAddr.string)
 				fmt.Println("\t\tcontent length: " + strconv.Itoa(len(js.Content)))

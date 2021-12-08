@@ -33,6 +33,8 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 	}
 	if Debug {
 		proxy.Verbose = true
+	} else {
+		proxy.Logger = log.New(ioutil.Discard, "", 0)
 	}
 
 	tlsConfig := &tls.Config{
@@ -61,9 +63,9 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 
 		var result JavaScript
 
-		if !Greedy && !strings.HasSuffix(r.Request.URL.String(), ".js") {
-			return r
-		}
+		//if !Greedy && !strings.HasSuffix(r.Request.URL.String(), ".js") {
+		//	return r
+		//}
 
 		result.UrlAddr.string = r.Request.URL.String()
 
@@ -84,11 +86,16 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 		//fmt.Println(string(bodyBytes))
 		//os.Exit(1)
 
-		result.Content = string(bodyBytes)
-		go func() {
-			ParseProxyResponse(result)
-			//time.Sleep(2 * time.Second)
-		}()
+		contenType := r.Header.Get("Content-Type")
+
+		if strings.Contains(contenType, "javascript") || strings.Contains(result.Content, "<script") ||
+			strings.Contains(result.Content, "/script>") || strings.Contains(result.Content, "\"script\"") {
+			//fmt.Println("bingo " + r.Request.URL.Hostname() + r.Request.URL.Path)
+			go func() {
+				ParseProxyResponse(result)
+				//time.Sleep(2 * time.Second)
+			}()
+		}
 		return r
 	})
 
@@ -100,7 +107,7 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 }
 
 func ParseProxyResponse(js JavaScript) {
-	err := js.UrlAddr.GetTLD()
+	err := js.UrlAddr.GetRootDomain()
 	if err != nil {
 		l.Log.Debug(err)
 		return

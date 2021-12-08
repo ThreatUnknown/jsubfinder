@@ -20,7 +20,7 @@ func (js *JavaScript) GetSubDomains() error {
 	if Debug {
 		defer TimeTrack(time.Now(), "GetSubDomains "+js.UrlAddr.string)
 	}
-	domainRegex, err := regexp.Compile("([a-zA-Z0-9][a-zA-Z0-9-]*\\." + js.UrlAddr.tld + ")")
+	domainRegex, err := regexp.Compile("([a-zA-Z0-9][a-zA-Z0-9-]*\\." + js.UrlAddr.rootDomain + ")")
 	if err != nil {
 		l.Log.Debug(err)
 		return err
@@ -40,6 +40,7 @@ func (js *JavaScript) GetSubDomains() error {
 
 }
 
+//GetSecrets uses regex to find secrets in the content of JS files
 func (js *JavaScript) GetSecrets() error {
 	if Debug {
 		defer TimeTrack(time.Now(), "GetSecrets "+js.UrlAddr.string)
