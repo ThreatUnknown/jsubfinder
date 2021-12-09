@@ -32,7 +32,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&C.Debug, "debug", "d", false, "Enable debug mode. Logs are stored in log.info")
 	rootCmd.PersistentFlags().BoolVarP(&C.Crawl, "crawl", "c", false, "Enable crawling") //Are these used in proxy? Mv to search
 	rootCmd.PersistentFlags().BoolVarP(&C.FindSecrets, "secrets", "s", false, "Check results for secrets e.g api keys")
-	rootCmd.PersistentFlags().BoolVarP(&C.Silent, "silent", "S", false, "Enable Silent mode")
+	rootCmd.PersistentFlags().BoolVarP(&C.Silent, "silent", "S", false, "Disable printing to the console")
 	rootCmd.PersistentFlags().StringVar(&C.Sig, "sig", "", "Location of signatures for finding secrets")
 	rootCmd.PersistentFlags().BoolVarP(&C.SSL, "nossl", "K", true, "Skip SSL cert verification")
 
@@ -50,7 +50,8 @@ func safetyChecks() error {
 	}
 
 	if C.Debug && C.Silent {
-		return errors.New("Please choose Debug mode or silent mode. Not both.")
+		l.Log.SetLevel(logrus.DebugLevel)
+		return errors.New("Please choose Debug mode or silent mode. Enabling both is conflicting.")
 	} else if C.Debug { //Setup logging
 
 		l.InitDetailedLogger(f)
@@ -59,6 +60,11 @@ func safetyChecks() error {
 		l.Log.Debug("Debug mode enabled")
 	} else if C.Silent {
 		l.Log.SetLevel(logrus.PanicLevel)
+	}
+
+	if C.Silent && C.OutputFile == "" {
+		l.Log.SetLevel(logrus.DebugLevel)
+		return errors.New("Please disable silent mode or output the results to a file with the -o flag otherwise you can't view the results.")
 	}
 
 	//Check if we can write to the outputFile

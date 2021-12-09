@@ -86,7 +86,9 @@ func ExecSearch(concurrency int, outputFile string) error {
 				for _, subdomain := range js.subdomains {
 					_, found := Find(newSubdomains, subdomain)
 					if !found {
-						fmt.Println(subdomain)
+						if !Silent {
+							fmt.Println(subdomain)
+						}
 						newSubdomains = append(newSubdomains, subdomain)
 					}
 				}
@@ -112,9 +114,11 @@ func ExecSearch(concurrency int, outputFile string) error {
 		if err != nil {
 			l.Log.Error(err)
 		}
-		SaveResults("secrets_"+outputFile, newSecrets)
-		if err != nil {
-			l.Log.Error(err)
+		if FindSecrets {
+			SaveResults("secrets_"+outputFile, newSecrets)
+			if err != nil {
+				l.Log.Error(err)
+			}
 		}
 	}
 	return nil
