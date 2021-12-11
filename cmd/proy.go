@@ -2,14 +2,11 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
 	C "github.com/hiddengearz/jsubfinder/core"
 	l "github.com/hiddengearz/jsubfinder/core/logger"
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 )
 
@@ -30,39 +27,48 @@ var proxyExec = &cobra.Command{
 		if cmd.Flags().Changed("upstream-proxy") {
 			upsteamProxySet = true
 		}
+		//Start the proxy server
 		C.StartProxy(":"+strconv.Itoa(C.LocalPort), upsteamProxySet)
 	},
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+
+		//Run the safety checks
 		err := safetyChecks()
 		if err != nil {
 			l.Log.Fatal(err)
 		}
+
+		//Make sure its a http proxy
 		if !strings.HasPrefix(C.UpsteamProxy, "http://") {
 			l.Log.Fatal(errors.New("Upsteam Proxy doesn't contain http://"))
 		}
-		//check if valid url...
 
-		home, err := homedir.Dir()
-		if err != nil {
-			l.Log.Fatal(err)
-		}
-		C.SSHFolder = home + "/.ssh/"
-		if !C.FolderExists(C.SSHFolder) {
-			l.Log.Fatal("Folder " + C.SSHFolder + " doesnt exist. Please create it")
-		}
-
-		C.Certificate = C.SSHFolder + "jsubfinder.pub"
-		C.Key = C.SSHFolder + "jsubfinder"
-
-		if !C.FileExists(C.Certificate) || !C.FileExists(C.Key) {
-
-			fmt.Println("creating cert!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-			err = C.CreateAuthority(C.Certificate, C.Key)
+		//Stuff to setup the certs
+		/*
+			//Get the homedir
+			home, err := homedir.Dir()
 			if err != nil {
-				log.Fatal(err)
+				l.Log.Fatal(err)
 			}
-		}
-		C.ReadCertificateDisk(C.Certificate, C.Key)
 
+
+			C.SSHFolder = home + "/.ssh/"
+			if !C.FolderExists(C.SSHFolder) {
+				l.Log.Fatal("Folder " + C.SSHFolder + " doesnt exist. Please create it")
+			}
+
+			C.Certificate = C.SSHFolder + "jsubfinder.pub"
+			C.Key = C.SSHFolder + "jsubfinder"
+
+			if !C.FileExists(C.Certificate) || !C.FileExists(C.Key) {
+
+				fmt.Println("creating cert!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+				err = C.CreateAuthority(C.Certificate, C.Key)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+			C.ReadCertificateDisk(C.Certificate, C.Key)
+		*/
 	},
 }

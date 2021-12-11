@@ -29,6 +29,8 @@ func ExecSearch(concurrency int, outputFile string) error {
 	//fmt.Print(Urls)
 	var data []WebPage
 	var wg = sync.WaitGroup{}
+	var newSubdomains []string
+	var newSecrets []string
 	maxGoroutines := concurrency
 	guard := make(chan struct{}, maxGoroutines)
 
@@ -39,7 +41,7 @@ func ExecSearch(concurrency int, outputFile string) error {
 		wg.Add(1)
 		go func(url string) {
 
-			results <- GetResults(url)
+			results <- GetResults(url) //fetch results and return them to a channel
 			<-guard
 			wg.Done()
 		}(url)
@@ -49,25 +51,25 @@ func ExecSearch(concurrency int, outputFile string) error {
 	close(guard)
 	close(results)
 
+	//Take results from the channel and add them to []webpage
 	for result := range results {
 		if result.Content != "" { //the urladdr will be blank if the page can't be reached. Thus don't add it.
 			data = append(data, result)
 		}
 	}
 
-	var newSubdomains []string
-	var newSecrets []string
+	//If Debug mode, print results
 	if Debug {
-		for _, url := range data {
-			fmt.Println("url: " + url.UrlAddr.string)
-			fmt.Println("\trootDomain: " + url.UrlAddr.rootDomain)
-			for _, js := range url.JSFiles {
-				fmt.Println("\tjs: " + js.UrlAddr.string)
-				fmt.Println("\t\tcontent length: " + strconv.Itoa(len(js.Content)))
-				for _, subdomain := range js.subdomains {
+		for _, url := range data { //For each URL the user provided
+			fmt.Println("url: " + url.UrlAddr.string)              //print the url
+			fmt.Println("\trootDomain: " + url.UrlAddr.rootDomain) //print the root domain
+			for _, js := range url.JSFiles {                       //For each URL with JS
+				fmt.Println("\tjs: " + js.UrlAddr.string)                           //Print the URL
+				fmt.Println("\t\tcontent length: " + strconv.Itoa(len(js.Content))) // Print the content length
+				for _, subdomain := range js.subdomains {                           //print the subdomain found in the js
 					fmt.Println("\t\tsubdomain: " + subdomain)
 					_, found := Find(newSubdomains, subdomain)
-					if !found {
+					if !found { //add the subdomain to the list of new subdomains if not in the list
 						newSubdomains = append(newSubdomains, subdomain)
 					}
 				}

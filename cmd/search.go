@@ -26,12 +26,12 @@ var searchExec = &cobra.Command{
 	Short: "Search javascript/URL's for domains",
 	Long:  `Execute the command specified`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		err := safetyChecks()
+		err := safetyChecks() //safety checks
 		if err != nil {
 			l.Log.Fatal(err)
 		}
 
-		err = getURLs()
+		err = getURLs() //Get the URL's from input file, -u flag or stdins
 		if err != nil {
 			l.Log.Fatal(err)
 		}
@@ -40,7 +40,7 @@ var searchExec = &cobra.Command{
 		if C.Debug {
 			defer core.TimeTrack(time.Now(), "searchExec")
 		}
-		C.ExecSearch(C.Threads, C.OutputFile)
+		C.ExecSearch(C.Threads, C.OutputFile) //Start the search
 	},
 }
 

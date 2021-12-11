@@ -49,20 +49,20 @@ func safetyChecks() error {
 		return (err)
 	}
 
-	if C.Debug && C.Silent {
+	if C.Debug && C.Silent { //if debug and silent flag are enabled return error
 		l.Log.SetLevel(logrus.DebugLevel)
 		return errors.New("Please choose Debug mode or silent mode. Enabling both is conflicting.")
 	} else if C.Debug { //Setup logging
 
 		l.InitDetailedLogger(f)
 		l.Log.SetLevel(logrus.DebugLevel)
-
 		l.Log.Debug("Debug mode enabled")
-	} else if C.Silent {
+
+	} else if C.Silent { //If silent supress all errors
 		l.Log.SetLevel(logrus.PanicLevel)
 	}
 
-	if C.Silent && C.OutputFile == "" {
+	if C.Silent && C.OutputFile == "" { //if silent and no output return error
 		l.Log.SetLevel(logrus.DebugLevel)
 		return errors.New("Please disable silent mode or output the results to a file with the -o flag otherwise you can't view the results.")
 	}
@@ -95,6 +95,7 @@ func safetyChecks() error {
 			C.Sig = home + "/.jsf_signatures.yaml"
 		}
 
+		//Load signatures for secrets
 		err := C.ConfigSigs.ParseConfig(C.Sig) //https://github.com/eth0izzle/shhgit/blob/090e3586ee089f013659e02be16fd0472b629bc7/core/signatures.go
 		if err != nil {
 			return err

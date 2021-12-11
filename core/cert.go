@@ -19,12 +19,12 @@ import (
 // Constants used for the SSL Certificates
 const (
 	bits          = 2048
-	organization  = "Proxify CA"
-	country       = "US"
-	province      = "CA"
-	locality      = "San Francisco"
-	streetAddress = "548 Market St"
-	postalCode    = "94104"
+	organization  = "Jsubfinder"
+	country       = "CA"
+	province      = "ON"
+	locality      = "Toronto"
+	streetAddress = "1 Not Your Business"
+	postalCode    = "123456"
 )
 
 //https://github.com/Skamaniak/ssl-decryption/blob/cc35498125e66e0ef770a85e4b9b7a5df582de7a/crypto/spoof.go#L65

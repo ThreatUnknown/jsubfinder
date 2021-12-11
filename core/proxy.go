@@ -146,7 +146,7 @@ func ParseProxyResponse(js JavaScript) {
 			return
 		}
 	}
-
+	//########################### get rid of these loops, use maps instead https://stackoverflow.com/questions/33207197/how-can-i-create-an-array-that-contains-unique-strings
 	for _, subdomain := range js.subdomains {
 		_, found := Find(newSubdomains, subdomain)
 		if !found {
