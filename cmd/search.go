@@ -17,6 +17,9 @@ func init() {
 	//rootCmd.AddCommand(cmdExec)
 	searchExec.PersistentFlags().StringVarP(&C.InputFile, "inputFile", "f", "", "File containing domains")
 	searchExec.PersistentFlags().StringSliceVarP(&C.InputURLs, "url", "u", []string{}, "Url to check")
+	searchExec.PersistentFlags().BoolVarP(&C.Crawl, "crawl", "c", false, "Enable crawling")
+	searchExec.PersistentFlags().IntVarP(&C.Threads, "threads", "t", 5, "Ammount of threads to be used")
+	searchExec.PersistentFlags().BoolVarP(&C.Greedy, "greedy", "g", false, "Check all files for URL's not just Javascript")
 
 }
 
@@ -26,6 +29,7 @@ var searchExec = &cobra.Command{
 	Short: "Search javascript/URL's for domains",
 	Long:  `Execute the command specified`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		C.Command = "search"
 		err := safetyChecks() //safety checks
 		if err != nil {
 			l.Log.Fatal(err)
@@ -40,7 +44,7 @@ var searchExec = &cobra.Command{
 		if C.Debug {
 			defer core.TimeTrack(time.Now(), "searchExec")
 		}
-		C.ExecSearch(C.Threads, C.OutputFile) //Start the search
+		C.ExecSearch(C.OutputFile) //Start the search
 	},
 }
 
@@ -51,14 +55,14 @@ func getURLs() (err error) {
 	} else if C.InputFile != "" { //else if -f isn't empty
 		core.InputURLs, err = core.ReadFile(C.InputFile)
 		return
-	} else if stat, _ := os.Stdin.Stat(); (stat.Mode() & os.ModeCharDevice) == 0 { //finally try from input being piped
+	} else if stat, _ := os.Stdin.Stat(); (stat.Mode() & os.ModeCharDevice) == 0 { //finally try from input being piped (stdin)
 		sc := bufio.NewScanner(os.Stdin)
 		for sc.Scan() {
 			core.InputURLs = append(core.InputURLs, strings.ToLower(sc.Text()))
 		}
 		return
 	} else {
-		return errors.New("No URL's provided")
+		return errors.New("no URL's provided")
 	}
 
 }

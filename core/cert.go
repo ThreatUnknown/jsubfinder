@@ -27,6 +27,8 @@ const (
 	postalCode    = "123456"
 )
 
+//Not used, was testing. Need to figure out how to setup a CA in golang
+
 //https://github.com/Skamaniak/ssl-decryption/blob/cc35498125e66e0ef770a85e4b9b7a5df582de7a/crypto/spoof.go#L65
 //https://github.com/Skamaniak/ssl-decryption/blob/cc35498125e66e0ef770a85e4b9b7a5df582de7a/server/web.go#L132
 //https://github.com/projectdiscovery/proxify/blob/0fdaa7d0fc4122d1a2e48d054771c744636b5caf/pkg/certs/ca.go

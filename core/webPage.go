@@ -22,7 +22,7 @@ type WebPage struct {
 //Get Subdomains and secrets from URL's
 func GetResults(url string) (wp WebPage) {
 	if Debug {
-		defer TimeTrack(time.Now(), url)
+		defer TimeTrack(time.Now(), "GetResults "+url)
 	}
 	var err error
 	var contenTypeJS bool = false
@@ -34,35 +34,41 @@ func GetResults(url string) (wp WebPage) {
 		},
 	}
 
-	err, wp.Content, contenTypeJS = wp.UrlAddr.GetContent(client) //retrieve the content of the webpage
+	wp.Content, contenTypeJS, err = wp.UrlAddr.GetContent(client) //retrieve the content of the webpage
 	if err != nil {
+		l.Log.Debug(err)
 		return
+	}
+	if contenTypeJS {
+		AddUrlVisited(wp.UrlAddr.string)
 	}
 
 	err = wp.UrlAddr.GetRootDomain() //Set the The root domain, e.g www.google.com > google.com
 	if err != nil {
+		l.Log.Debug(err)
 		return
 	}
 
 	if Crawl {
 		wp.JSFiles, err = wp.GetJSLinks()
 		if err != nil {
-			l.Log.Error(err)
+			l.Log.Debug(err)
 		}
 	}
 
 	//If the base url happens to be a JS via its content-type header, add it to the list
 	if contenTypeJS {
-		wp.JSFiles = append(wp.JSFiles, JavaScript{wp.UrlAddr, wp.Content, nil, nil}) //Add the base url to JSFiles as there may be inline JS
+		wp.JSFiles = append(wp.JSFiles, JavaScript{wp.UrlAddr, wp.Content, make(map[string]bool), make(map[string]bool)}) //Add the base url to JSFiles as there may be inline JS
 		fmt.Println("GetResults content type JS")
 	}
 
 	if strings.Contains(wp.Content, "<script") || strings.Contains(wp.Content, "/script>") || strings.Contains(wp.Content, "\"script\"") {
-		wp.JSFiles = append(wp.JSFiles, JavaScript{wp.UrlAddr, wp.Content, nil, nil}) //Add the base url to JSFiles as there may be inline JS
+		wp.JSFiles = append(wp.JSFiles, JavaScript{wp.UrlAddr, wp.Content, make(map[string]bool), make(map[string]bool)}) //Add the base url to JSFiles as there may be inline JS
 	} else {
 		l.Log.Debug("no script tags in: " + wp.UrlAddr.string)
 	}
 
+	//setup go routings
 	var wg = sync.WaitGroup{}
 	maxGoroutines := 2
 	guard := make(chan struct{}, maxGoroutines)
@@ -74,13 +80,20 @@ func GetResults(url string) (wp WebPage) {
 
 	results := make(chan result, len(wp.JSFiles))
 
+	//for each JSFile, get content
 	for i, js := range wp.JSFiles {
 		if js.Content == "" {
 			guard <- struct{}{}
 			wg.Add(1)
 			go func(i int, js JavaScript) {
 
-				_, tmp, _ := js.GetContent(client)
+				tmp, contenTypeJS, err := js.GetContent(client)
+				if err != nil {
+					l.Log.Debug(err)
+				}
+				if contenTypeJS { //if the page was a JS file or has js, add it to urls visited
+					AddUrlVisited(wp.UrlAddr.string)
+				}
 				tmpResult := result{
 					int:    i,
 					string: tmp,
@@ -128,7 +141,6 @@ func GetResults(url string) (wp WebPage) {
 
 //GetJSLinks retrieves the links to JS files from the content of the url
 func (wp *WebPage) GetJSLinks() (JSFile []JavaScript, err error) {
-	var found bool
 	var results [][]string
 
 	if Debug {
@@ -153,40 +165,40 @@ func (wp *WebPage) GetJSLinks() (JSFile []JavaScript, err error) {
 	}
 
 	for _, result := range results {
-		found = false
 
-		for _, js := range wp.JSFiles {
-			if result[1] == js.UrlAddr.string {
-				found = true
-			}
-		}
-
-		if !found {
-			var protocol string
-			if result[1] != "" {
-				if strings.HasPrefix(result[1], "http://") || strings.HasPrefix(result[1], "https://") {
-					JSFile = append(JSFile, JavaScript{UrlAddr{result[1], wp.UrlAddr.rootDomain}, "", nil, nil})
-				} else if strings.HasPrefix(result[1], "//") {
-					protocol, err = GetHTTprotocol(wp.UrlAddr.string)
-					if err != nil {
-						return
-					}
-					link := result[1]
-					link = protocol + link[2:]
-					JSFile = append(JSFile, JavaScript{UrlAddr{link, wp.UrlAddr.rootDomain}, "", nil, nil})
-				} else {
-					protocol, err = GetHTTprotocol(wp.UrlAddr.string)
-					if err != nil {
-						return
-					}
-					link := strings.Replace(wp.UrlAddr.string, protocol, "", 1) + "/" + result[1]
-					link = protocol + strings.Replace(link, "//", "/", -1)
-					JSFile = append(JSFile, JavaScript{UrlAddr{link, wp.UrlAddr.rootDomain}, "", nil, nil})
+		var protocol string
+		if result[1] != "" {
+			if strings.HasPrefix(result[1], "http://") || strings.HasPrefix(result[1], "https://") {
+				if IsUrlVisited(result[1]) {
+					continue
 				}
+				JSFile = append(JSFile, JavaScript{UrlAddr{result[1], wp.UrlAddr.rootDomain}, "", make(map[string]bool), make(map[string]bool)})
+			} else if strings.HasPrefix(result[1], "//") {
+				protocol, err = GetHTTprotocol(wp.UrlAddr.string) //assumption that the JS file will be hosted on same protocol as web server
+				if err != nil {
+					return
+				}
+				link := result[1]
+				link = protocol + link[2:]
+				if IsUrlVisited(link) {
+					continue
+				}
+				JSFile = append(JSFile, JavaScript{UrlAddr{link, wp.UrlAddr.rootDomain}, "", make(map[string]bool), make(map[string]bool)})
+			} else {
+				protocol, err = GetHTTprotocol(wp.UrlAddr.string) //assumption that the JS file will be hosted on same protocol as web server
+				if err != nil {
+					return
+				}
+				link := strings.Replace(wp.UrlAddr.string, protocol, "", 1) + "/" + result[1]
+				link = protocol + strings.Replace(link, "//", "/", -1)
+				if IsUrlVisited(link) {
+					continue
+				}
+				JSFile = append(JSFile, JavaScript{UrlAddr{link, wp.UrlAddr.rootDomain}, "", make(map[string]bool), make(map[string]bool)})
 			}
 			//JSFile append
 		}
 	}
-
+	//time.Sleep(300)
 	return
 }

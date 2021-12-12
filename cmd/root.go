@@ -17,7 +17,6 @@ var (
 		Short: "Agent for the [redacted] project",
 		Long:  `[redacted]`,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-
 		},
 	}
 )
@@ -26,11 +25,10 @@ func init() {
 	l.Log = logrus.New()
 	rootCmd.AddCommand(searchExec)
 	rootCmd.AddCommand(proxyExec)
-	rootCmd.PersistentFlags().IntVarP(&C.Threads, "threads", "t", 5, "Ammount of threads to be used") //Are these used in proxy? Mv to search
+
 	rootCmd.PersistentFlags().StringVarP(&C.OutputFile, "outputFile", "o", "", "name/location to store the file")
-	rootCmd.PersistentFlags().BoolVarP(&C.Greedy, "greedy", "g", false, "Check all files for URL's not just Javascript") //Are these used in proxy? Mv to search
 	rootCmd.PersistentFlags().BoolVarP(&C.Debug, "debug", "d", false, "Enable debug mode. Logs are stored in log.info")
-	rootCmd.PersistentFlags().BoolVarP(&C.Crawl, "crawl", "c", false, "Enable crawling") //Are these used in proxy? Mv to search
+
 	rootCmd.PersistentFlags().BoolVarP(&C.FindSecrets, "secrets", "s", false, "Check results for secrets e.g api keys")
 	rootCmd.PersistentFlags().BoolVarP(&C.Silent, "silent", "S", false, "Disable printing to the console")
 	rootCmd.PersistentFlags().StringVar(&C.Sig, "sig", "", "Location of signatures for finding secrets")
@@ -44,17 +42,13 @@ func Execute() error {
 
 //Things to check before running any code.
 func safetyChecks() error {
-	f, err := os.OpenFile("log.info", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-	if err != nil {
-		return (err)
-	}
 
 	if C.Debug && C.Silent { //if debug and silent flag are enabled return error
 		l.Log.SetLevel(logrus.DebugLevel)
-		return errors.New("Please choose Debug mode or silent mode. Enabling both is conflicting.")
+		return errors.New("please choose Debug mode or silent mode. Enabling both is conflicting")
 	} else if C.Debug { //Setup logging
 
-		l.InitDetailedLogger(f)
+		l.InitDetailedLogger()
 		l.Log.SetLevel(logrus.DebugLevel)
 		l.Log.Debug("Debug mode enabled")
 
@@ -64,7 +58,7 @@ func safetyChecks() error {
 
 	if C.Silent && C.OutputFile == "" { //if silent and no output return error
 		l.Log.SetLevel(logrus.DebugLevel)
-		return errors.New("Please disable silent mode or output the results to a file with the -o flag otherwise you can't view the results.")
+		return errors.New("please disable silent mode or output the results to a file with the -o flag otherwise you can't view the results")
 	}
 
 	//Check if we can write to the outputFile
@@ -105,6 +99,7 @@ func safetyChecks() error {
 			return err
 		}
 		C.Blacklisted_extensions = []string{".exe", ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".psd", ".xcf", ".zip", ".tar.gz", ".ttf", ".lock"}
+
 		if C.Silent == true {
 			C.PrintSecrets = false
 		} else {
@@ -118,7 +113,7 @@ func safetyChecks() error {
 
 	//ensure output is being sent to console or outputfile.
 	if C.Silent && C.OutputFile == "" {
-		return errors.New("If you aren't saving the output with -o and you want the display silenced -S, what's the point of running JSubfinder?")
+		return errors.New("if you aren't saving the output with -o and you want the console output silenced -S, what's the point of running JSubfinder?")
 	}
 
 	return nil
