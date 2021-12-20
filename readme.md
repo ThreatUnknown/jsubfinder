@@ -1,4 +1,5 @@
-## ![jsubfinder logo](https://user-images.githubusercontent.com/17349277/146628329-af844760-2278-47b8-9ec1-022254774af7.png)
+## ![jsubfinder logo](https://user-images.githubusercontent.com/17349277/146734055-8b836305-7a13-4c66-a02b-d92932322b42.png)
+
 
 
 jsubfinder searches webpages for javascript & analyzes them for hidden subdomains and secrets (wip). From it's inception jsubfinder has been designed with performance in mind, to utilize large data sets & to be chained with other tools. It utilizes the [fasthttp go library](https://github.com/valyala/fasthttp) & golang's amazing concurency for blazing fast results.
