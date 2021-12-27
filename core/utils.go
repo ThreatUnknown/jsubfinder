@@ -3,33 +3,29 @@ package core
 import (
 	"bufio"
 	"errors"
-	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	l "github.com/hiddengearz/jsubfinder/core/logger"
 )
 
-var Greedy = false
-
-//Debug enables or disables debug mode
-var Debug = false
-var Crawl = false
-
 //RadFile reads the content of a file and returns it in a slice
-func ReadFile(filePath string) []string {
+func ReadFile(filePath string) (content []string, err error) {
 	if Debug {
 		defer TimeTrack(time.Now(), "ReadFile "+filePath)
 	}
-	file, err := os.Open(filePath)
-	var content []string
 
+	file, err := os.Open(filePath)
 	if err != nil {
-		log.Fatal(err)
-		return nil
+		l.Log.Debug(err)
+		return
 	}
+
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
@@ -39,11 +35,19 @@ func ReadFile(filePath string) []string {
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-		return nil
+		return content, err
 	}
 
-	return content
+	return
+}
+
+func ReadFileIntoBytes(filePath string) (content []byte, err error) {
+	content, err = ioutil.ReadFile(filePath) // b has type []byte
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return
 }
 
 //Find searches a []string for a substring and return it's position in the array and a bool for if it's in the array
@@ -82,23 +86,12 @@ func TimeTrack(start time.Time, name string) {
 	fmt.Println(name + " took " + strconv.FormatFloat(elapsed.Seconds(), 'f', 3, 64) + "s")
 }
 
-//IsFlagPassed checks if a flag has been passed as an argument
-func IsFlagPassed(name string) bool {
-	found := false
-	flag.Visit(func(f *flag.Flag) {
-		if f.Name == name {
-			found = true
-		}
-	})
-	return found
-}
-
 //SaveResults saves the content to the spcified file
-func SaveResults(fileLocation string, newContent []string) {
+func SaveResults(fileLocation string, newContent []string) error {
 	newFile, err := os.OpenFile(fileLocation, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
 	if err != nil {
-		log.Fatalf("failed creating file: %s", err)
+		return err
 	}
 
 	datawriter := bufio.NewWriter(newFile)
@@ -109,13 +102,25 @@ func SaveResults(fileLocation string, newContent []string) {
 
 	datawriter.Flush()
 	newFile.Close()
+	return nil
 }
 
 //fileExists returns a bool if the file exists or not
-func fileExists(filename string) bool {
+func FileExists(filename string) bool {
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {
+		l.Log.Debug(err)
 		return false
 	}
 	return !info.IsDir()
+}
+
+//folderExists returns a bool if the folder exists or not
+func FolderExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		l.Log.Debug(err)
+		return false
+	}
+	return info.IsDir()
 }

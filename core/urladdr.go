@@ -2,72 +2,124 @@ package core
 
 import (
 	"errors"
-	"fmt"
+	"io/ioutil"
+	"net/http"
 	"strings"
 	"time"
 
-	"github.com/valyala/fasthttp"
+	l "github.com/hiddengearz/jsubfinder/core/logger"
+	tld "github.com/jpillora/go-tld"
 )
 
 type UrlAddr struct {
-	string
-	tld string
+	string            //URL address
+	rootDomain string //Top Level Domain of the URL
 }
 
 //GetContent retrieves the content of urls - #### MAYBE CHECK FOR redirects and follow them????
-func (u *UrlAddr) GetContent(client *fasthttp.Client) (err error, newContent string) {
+func (u *UrlAddr) GetContent(client *http.Client) (newContent string, isJS bool, err error) {
+	//defer lock.RUnlock()
+
+	var req *http.Request
+	var resp *http.Response
 	if Debug {
 		defer TimeTrack(time.Now(), "GetContent "+u.string)
 	}
-	req := fasthttp.AcquireRequest()
-	resp := fasthttp.AcquireResponse()
-	defer fasthttp.ReleaseRequest(req)   // <- do not forget to release
-	defer fasthttp.ReleaseResponse(resp) // <- do not forget to release
 
-	req.Header.Set("User-agent", "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0")
+	//If the provided URL starts with HTTP/s make a request
 	if strings.HasPrefix(u.string, "https://") || strings.HasPrefix(u.string, "http://") {
 
-		req.SetRequestURI(u.string)
-
-		err = client.Do(req, resp)
-		if err != nil {
-			if Debug {
-				fmt.Printf("Client get failed: %s\n", err)
-			}
+		if IsUrlVisited(u.string) {
+			err = errors.New("Url " + u.string + " was been scanned before")
 			return
 		}
 
-	} else {
-		req.SetRequestURI("https://" + u.string)
+		req, err = http.NewRequest(http.MethodGet, u.string, nil)
+		if err != nil {
+			l.Log.Debug("Client get failed: %s\n", err)
+			return
+		}
 
-		err = client.Do(req, resp)
-		if err != nil && !strings.Contains(string(err.Error()), "no such host") {
-			if Debug {
-				fmt.Printf("new err Client get failed: %s\n", err)
-			}
-			req.SetRequestURI("http://" + u.string)
+		req.Header.Set("User-agent", "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0")
 
-			err = client.Do(req, resp)
-			if err != nil {
-				if Debug {
-					fmt.Printf("Client get failed: %s\n", err)
-				}
+		resp, err = client.Do(req)
+		if err != nil {
+			l.Log.Debug("Client get failed: %s\n", err)
+			return
+		}
+
+	} else { //if the request doesn't start with HTTP/s, add it
+		if IsUrlVisited("http://" + u.string) {
+			err = errors.New("Url " + "http://" + u.string + " was been scanned before")
+			return
+		}
+
+		req, err = http.NewRequest(http.MethodGet, "http://"+u.string, nil)
+		if err != nil {
+			l.Log.Debug("Client get failed: %s\n", err)
+			return
+		}
+
+		req.Header.Set("User-agent", "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0")
+
+		resp, err = client.Do(req)
+
+		if err != nil && !strings.Contains(string(err.Error()), "no such host") { //if there is an error and its not due to dns
+			l.Log.Debug("new err Client get failed: %s\n", err)
+
+			if IsUrlVisited("https://" + u.string) {
+				err = errors.New("Url " + u.string + " was been scanned before")
 				return
 			}
-			err = errors.New("http")
 
-		} else if err != nil {
-			if Debug {
-				fmt.Printf("Client get failed: %s\n", err)
+			req, err = http.NewRequest(http.MethodGet, "https://"+u.string, nil) //try a request with https
+			if err != nil {
+				l.Log.Debug("Client get failed: %s\n", err)
+				return
 			}
+
+			resp, err = client.Do(req)
+			if err != nil {
+				l.Log.Debug("Client get failed: %s\n", err)
+				return
+			}
+			u.string = "https://" + u.string
+		} else if err != nil {
+			l.Log.Debug("Client get failed: %s\n", err)
 			return
-		} else {
-			err = errors.New("https")
+		} else { //if no error
+			u.string = "http://" + u.string
+
 		}
 	}
 
-	bodyBytes := resp.Body()
+	contenType := resp.Header.Get("Content-Type")
+	if contenType == "" {
+		isJS = false
+	} else if strings.Contains(contenType, "javascript") {
+		isJS = true
+		//fmt.Println("content type js" + u.string)
+	}
+
+	//read the body and return it
+	defer resp.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
 	newContent = (string(bodyBytes))
 
-	return err, newContent
+	return
+}
+
+//Get the Top Level Domain of the URL
+func (u *UrlAddr) GetRootDomain() (err error) {
+	u2, err := tld.Parse(u.string)
+	if err != nil {
+		return
+	}
+
+	u.rootDomain = u2.Domain + "." + u2.TLD
+	return
 }

@@ -1,12 +1,12 @@
 package core
 
 import (
-	"fmt"
+	"errors"
 	"io/ioutil"
-	"log"
 	"regexp"
 	"regexp/syntax"
 
+	l "github.com/hiddengearz/jsubfinder/core/logger"
 	"gopkg.in/yaml.v2"
 
 	//"strconv"
@@ -16,7 +16,6 @@ import (
 var ConfigSigs ConfigSignature
 var Signatures []Signature
 var Blacklisted_extensions []string
-var FindSecrets bool
 var PrintSecrets bool = false
 
 type ConfigSignature struct {
@@ -29,36 +28,36 @@ type ConfigSignature struct {
 	} `yaml:"signatures"`
 }
 
-func (config *ConfigSignature) ParseConfig(fileName string) {
-	if fileExists(fileName) {
+func (config *ConfigSignature) ParseConfig(fileName string) error {
+	if FileExists(fileName) {
 		//fmt.Println("Parsing " + fileName)
 
 		yamlFile, err := ioutil.ReadFile(fileName)
 		if err != nil {
-			fmt.Printf("Error reading YAML file: %s\n", err)
-			return
+			return err
+
 		}
 
 		err = yaml.Unmarshal(yamlFile, &config)
 		if err != nil {
-			fmt.Printf("Error parsing YAML file: %s\n", err)
+			return err
 		}
 
 		//fmt.Printf("Result: %v\n", config)
 
 	} else {
-		log.Fatal(fileName + "doesn't exist")
-		return
+		return errors.New(fileName + " doesn't exist")
 	}
+	return nil
 
 }
 
 type Signature interface {
 	Name() string
-	Match(data *JSData) []string
+	Match(js *JavaScript) []string
 }
 
-func (config *ConfigSignature) GetSignatures() []Signature {
+func (config *ConfigSignature) GetSignatures() ([]Signature, error) {
 	var signatures []Signature
 	for _, signature := range config.Signatures {
 		if signature.Match != "" {
@@ -74,11 +73,13 @@ func (config *ConfigSignature) GetSignatures() []Signature {
 					part:  signature.Part,
 					match: regexp.MustCompile(signature.Regex),
 				})
+			} else {
+				return signatures, err
 			}
 		}
 	}
 	//fmt.Println("total signatures: " + strconv.Itoa(len(signatures)))
-	return signatures
+	return signatures, nil
 }
 
 type SimpleSignature struct {
@@ -90,7 +91,7 @@ type SimpleSignature struct {
 func (s *SimpleSignature) Name() string {
 	return s.name
 }
-func (s *SimpleSignature) Match(data *JSData) (secrets []string) {
+func (s *SimpleSignature) Match(js *JavaScript) (secrets []string) {
 	/*
 			switch s.part {
 		case PartPath:
@@ -111,17 +112,13 @@ func (s *SimpleSignature) Match(data *JSData) (secrets []string) {
 
 	if s.match != "" {
 
-		if strings.Contains(data.UrlAddr.string, s.match) {
+		if strings.Contains(js.UrlAddr.string, s.match) {
 			secrets = append(secrets, s.name+" "+s.match+" found in URL")
-			if Debug {
-				fmt.Println(s.name + " " + s.match + " found within URL of " + data.UrlAddr.string)
-			}
+			l.Log.Debug(s.name + " " + s.match + " found within URL of " + js.UrlAddr.string)
 		}
-		if strings.Contains(data.Content, s.match) {
+		if strings.Contains(js.Content, s.match) {
 			secrets = append(secrets, s.name+" "+s.match+" found in content")
-			if Debug {
-				fmt.Println(s.name + " " + s.match + " found in content of " + data.UrlAddr.string)
-			}
+			l.Log.Debug(s.name + " " + s.match + " found in content of " + js.UrlAddr.string)
 		}
 
 		return secrets
@@ -141,24 +138,20 @@ type PatternSignature struct {
 func (s *PatternSignature) Name() string {
 	return s.name
 }
-func (s *PatternSignature) Match(data *JSData) (secrets []string) {
+func (s *PatternSignature) Match(js *JavaScript) (secrets []string) {
 	if s.match != nil {
-		if s.match.MatchString(data.UrlAddr.string) {
-			tmp := s.match.FindAllString(data.UrlAddr.string, -1)
+		if s.match.MatchString(js.UrlAddr.string) {
+			tmp := s.match.FindAllString(js.UrlAddr.string, -1)
 			for _, secret := range tmp {
-				secrets = append(secrets, s.name+" "+secret+" found in URL")
-				if Debug {
-					fmt.Println(s.name + " " + secret + " found within URL of " + data.UrlAddr.string)
-				}
+				secrets = append(secrets, s.name+" "+secret+" found within URL of "+js.UrlAddr.string)
+				l.Log.Debug(s.name + " " + secret + " found within URL of " + js.UrlAddr.string)
 			}
 		}
-		if s.match.MatchString(data.Content) {
-			tmp := s.match.FindAllString(data.Content, -1)
+		if s.match.MatchString(js.Content) {
+			tmp := s.match.FindAllString(js.Content, -1)
 			for _, secret := range tmp {
-				secrets = append(secrets, s.name+" "+secret+" found in content")
-				if Debug {
-					fmt.Println(s.name + " " + secret + " found within content of " + data.UrlAddr.string)
-				}
+				secrets = append(secrets, s.name+" "+secret+" found within content of "+js.UrlAddr.string)
+				l.Log.Debug(s.name + " " + secret + " found within content of " + js.UrlAddr.string)
 			}
 		}
 	}
