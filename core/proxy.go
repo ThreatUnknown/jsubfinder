@@ -22,11 +22,16 @@ var Key string
 var X509pair tls.Certificate
 var subDomainlogger *log.Logger
 var secretsLogger *log.Logger
+var hasScope bool = false
 var Scope []string
 var inScope bool
 
 //start the proxy server
 func StartProxy(port string, upsteamProxySet bool) (err error) {
+	if len(Scope) > 0 {
+		hasScope = true
+	}
+
 	proxy := goproxy.NewProxyHttpServer()
 
 	//if upstream proxy set, proxy all requests
@@ -42,6 +47,7 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 	} else {
 		proxy.Logger = log.New(ioutil.Discard, "", 0)
 	}
+	proxy.Logger = log.New(ioutil.Discard, "", 0)
 	/*
 		tlsConfig := &tls.Config{
 			InsecureSkipVerify: true,
@@ -70,7 +76,7 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 		var result JavaScript
 
 		//if there is a scope, check it
-		if Scope != nil {
+		if hasScope {
 			inScope = false
 			for _, host := range Scope {
 				if host+":"+r.Request.URL.Port() == r.Request.URL.Host {
@@ -79,12 +85,12 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 				}
 
 			}
-		}
 
-		//if provided url isnt in scope, then return
-		if !inScope {
-			//l.Log.Debug(r.Request.URL.String() + " not in scope")
-			return r
+			//if provided url isnt in scope, then return
+			if !inScope {
+				l.Log.Debug(r.Request.URL.String() + " not in scope")
+				return r
+			}
 		}
 
 		result.subdomains = make(map[string]bool)
@@ -102,6 +108,7 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 
 		result.Content = string(bodyBytes)
 		if result.Content == "" { //if no content, then there is no JS, return
+			l.Log.Debug(result.UrlAddr.string + " has no body")
 			return r
 		}
 
@@ -119,6 +126,8 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 				//time.Sleep(2 * time.Second)
 			}()
 			AddUrlVisited(result.UrlAddr.string)
+		} else {
+			l.Log.Debug(result.UrlAddr.string + " has no js")
 		}
 		return r
 	})
@@ -149,6 +158,7 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 
 //Process requests, print them to console and to file
 func ParseProxyResponse(js JavaScript) {
+	l.Log.Debug("parsing " + js.UrlAddr.string)
 	err := js.UrlAddr.GetRootDomain()
 	if err != nil {
 		l.Log.Debug(err)
