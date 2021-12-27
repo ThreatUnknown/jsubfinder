@@ -2,28 +2,62 @@
 
 
 
-jsubfinder searches webpages for javascript & analyzes them for hidden subdomains and secrets (wip). From it's inception jsubfinder has been designed with performance in mind, to utilize large data sets & to be chained with other tools. It utilizes the [fasthttp go library](https://github.com/valyala/fasthttp) & golang's amazing concurency for blazing fast results.
-
-This tool is still in active development thus hasn't been refactored and has alot of room for optomizations.
+JSubFinder is a tool writtin in golang to search webpages & javascript for hidden subdomains and secrets in the given URL. Developed with BugBounty hunters in mind JSubFinder takes advantage of Go's amazing performance allowing it to utilize large data sets & be easily chained with other tools.
 
 ## Install
+---
+Install the application and download the signatures needed to find secrets
 
-```
-▶ go install github.com/hiddengearz/jsubfinder@latest
+Using GO:
+```bash
+go install github.com/hiddengearz/jsubfinder@latest
 wget https://raw.githubusercontent.com/hiddengearz/jsubfinder/master/.jsf_signatures.yaml && mv .jsf_signatures.yaml ~/.jsf_signatures.yaml
 ```
 
-## Basic Usage
+or
 
-jsubfinder accepts line-delimited domains on `stdin` & file input:
+[Downloads Page](https://github.com/hiddengearz/jsubfinder/tags)
+
+
+## Basic Usage
+---
+
+### Search
+
+Search the given url's for subdomains and secrets
+
+```text
+$ jsubfinder search -h
+
+Execute the command specified
+
+Usage:
+  JSubFinder search [flags]
+
+Flags:
+  -c, --crawl              Enable crawling
+  -g, --greedy             Check all files for URL's not just Javascript
+  -h, --help               help for search
+  -f, --inputFile string   File containing domains
+  -t, --threads int        Ammount of threads to be used (default 5)
+  -u, --url strings        Url to check
+
+Global Flags:
+  -d, --debug               Enable debug mode. Logs are stored in log.info
+  -K, --nossl               Skip SSL cert verification (default true)
+  -o, --outputFile string   name/location to store the file
+  -s, --secrets             Check results for secrets e.g api keys
+      --sig string          Location of signatures for finding secrets
+  -S, --silent              Disable printing to the console
+```
 
 Examples (results are the same in this case):
-```
-▶ jsubfinder -u www.google.com
-▶ jsubfinder -f google.txt
-▶ echo www.google.com | jsubfinder
-▶ echo www.google.com | jsubfinder -crawl
-▶ echo www.google.com | httpx --silent | jsubfinder
+
+```bash
+$ jsubfinder search -u www.google.com
+$ jsubfinder search -f file.txt
+$ echo www.google.com | jsubfinder search
+$ echo www.google.com | httpx --silent | jsubfinder search$
 
 apis.google.com
 ogs.google.com
@@ -37,10 +71,13 @@ adservice.google.com
 play.google.com
 ```
 
-### With Secrets Enabled
 
-```
-▶ echo www.youtube.com | ./jsubfinder -s
+
+#### With Secrets Enabled
+
+```bash
+
+$ echo www.youtube.com | jsubfinder -s
 www.youtube.com
 youtubei.youtube.com
 payments.youtube.com
@@ -51,27 +88,89 @@ tv.youtube.com
 music.youtube.com
 creatoracademy.youtube.com
 artists.youtube.com
-Google Cloud API Key AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8 found in content of https://www.youtube.com
-Google Cloud API Key AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8 found in content of https://www.youtube.com
-Google Cloud API Key AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8 found in content of https://www.youtube.com
-Google Cloud API Key AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8 found in content of https://www.youtube.com
-Google Cloud API Key AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8 found in content of https://www.youtube.com
-Google Cloud API Key AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8 found in content of https://www.youtube.com
+
+Google Cloud API Key <redacted> found in content of https://www.youtube.com
+Google Cloud API Key <redacted> found in content of https://www.youtube.com
+Google Cloud API Key <redacted> found in content of https://www.youtube.com
+Google Cloud API Key <redacted> found in content of https://www.youtube.com
+Google Cloud API Key <redacted> found in content of https://www.youtube.com
+Google Cloud API Key <redacted> found in content of https://www.youtube.com
 ```
 
-flag          | Description
-------------- | -------------
--c            | Set the concurrency level (Default 10)
--f            | file with urls on each line
--u            | single url address to scan
--o            | file to output subdomains to. If secrets is enabled it's output file will be abreviated with secret_
--crawl        | Enable the basic crawler
--sig          | (optional) Location of signature file, by default is ~/.jsf_signatures.yaml
--d            | Enable debug mode
--g            | Enables greedy regex which scans all urls and not just JS files. This is disabled by default but will likely be enabled by default in the future
--s            | Enable secrets (beta), can result in alot of false positives.
+#### Advanced examples
+```bash
+$ echo www.google.com | jsubfinder search -crawl -s -S -o jsf_google.txt -t 10 -g
+```
 
-## Credits
+* `-crawl` use the default crawler to crawl pages for other URL's to analyze
+* `-s` enables JSubFinder to search for secrets
+* `-S` Silence output to console
+* `-o <file>` save output to specified file
+* `-t 10` use 10 threads
+* `-g` search every URL for JS, even ones we don't think have any
 
-* The secrets (beta) funtion of this tool is heavily based off of [eth0izzle's](https://github.com/eth0izzle) [shhgit](https://github.com/eth0izzle/shhgit)
-* jsubfinder is inspired by [nsonaniya2010's](https://github.com/nsonaniya2010) [SubDomainizer](https://github.com/nsonaniya2010/SubDomainizer)
+### Proxy
+Enables the upstream HTTP proxy with TLS MITM sypport. This allows you to:
+
+1) Browse sites in realtime and have JSubFinder search for subdomains and secrets real time.
+2) If needed run jsubfinder on another server to offload the workload
+
+```text
+$ JSubFinder proxy -h
+
+Execute the command specified
+
+Usage:
+  JSubFinder proxy [flags]
+
+Flags:
+  -h, --help                    help for proxy
+  -p, --port int                Port for the proxy to listen on (default 8444)
+      --scope strings           Url's in scope seperated by commas. e.g www.google.com,www.netflix.com
+  -u, --upstream-proxy string   Adress of upsteam proxy e.g http://127.0.0.1:8888 (default "http://127.0.0.1:8888")
+
+Global Flags:
+  -d, --debug               Enable debug mode. Logs are stored in log.info
+  -K, --nossl               Skip SSL cert verification (default true)
+  -o, --outputFile string   name/location to store the file
+  -s, --secrets             Check results for secrets e.g api keys
+      --sig string          Location of signatures for finding secrets
+  -S, --silent              Disable printing to the console
+```
+
+```bash
+$ jsubfinder proxy
+Proxy started on :8444
+Subdomain: out.reddit.com
+Subdomain: www.reddit.com
+Subdomain: 2Fwww.reddit.com
+Subdomain: alb.reddit.com
+Subdomain: about.reddit.com
+```
+
+#### With Burp Suite
+1) Configure Burp Suite to forward traffic to an upstream proxy/ (User Options > Connections > Upsteam Proxy Servers > Add)
+2) Run JSubFinder in proxy mode
+
+Burp Suite will now forward all traffic proxied through it to JSubFinder. JSubFinder will retrieve the response, return it to burp and in another thread search for subdomains and secrets.
+
+#### With Proxify
+1) Launch [Proxify](https://github.com/projectdiscovery/proxify) & dump traffic to a folder `proxify -output logs`
+2) Configure Burp Suite, a Browser or other tool to forward traffic to Proxify (see instructions on their [github page](https://github.com/projectdiscovery/proxify))
+3) Launch JSubFinder in proxy mode & set the upstream proxy as Proxify `jsubfinder proxy -u http://127.0.0.1:8443`
+4) Use Proxify's replay utility to replay the dumped traffic to jsubfinder `replay -output logs -burp-addr http://127.0.0.1:8444`
+
+
+#### Run on another server
+Simple, run JSubFinder in proxy mode on another server e.g 192.168.1.2. Follow the proxy steps above but set your applications upstream proxy as 192.168.1.2:8443
+
+#### Advanced Examples
+
+```bash
+$ jsubfinder proxy --scope www.reddit.com -p 8081 -S -o jsf_reddit.txt
+```
+
+* `--scope` limits JSubFinder to only analyze responses from www.reddit.com
+* `-p` port JSubFinders proxy server is running on
+* `-S` silence output to the console/stdout
+* `-o <file>` output examples to this file
