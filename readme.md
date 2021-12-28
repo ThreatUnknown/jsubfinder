@@ -2,7 +2,11 @@
 
 
 
+
 JSubFinder is a tool writtin in golang to search webpages & javascript for hidden subdomains and secrets in the given URL. Developed with BugBounty hunters in mind JSubFinder takes advantage of Go's amazing performance allowing it to utilize large data sets & be easily chained with other tools.
+
+
+![z69D8q](https://user-images.githubusercontent.com/17349277/147615346-9c1471a6-a9a8-45cb-a429-f789b255950c.gif)
 
 ## Install
 ---
