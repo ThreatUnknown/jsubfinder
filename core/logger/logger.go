@@ -2,7 +2,6 @@ package logger
 
 import (
 	"os"
-	"path"
 	"runtime"
 	"strings"
 
@@ -18,7 +17,7 @@ var (
 )
 
 // This initiates a new Logger and defines the format for logs
-func InitDetailedLogger(f *os.File) {
+func InitDetailedLogger() {
 
 	Log = logrus.New()
 	Log.SetReportCaller(true)
@@ -29,8 +28,8 @@ func InitDetailedLogger(f *os.File) {
 		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
 			s := strings.Split(f.Function, ".")
 			funcname := s[len(s)-1]
-			_, filename := path.Split(f.File)
-			return funcname, filename
+
+			return funcname, ""
 		},
 	})
 

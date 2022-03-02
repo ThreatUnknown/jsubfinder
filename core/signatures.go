@@ -143,14 +143,14 @@ func (s *PatternSignature) Match(js *JavaScript) (secrets []string) {
 		if s.match.MatchString(js.UrlAddr.string) {
 			tmp := s.match.FindAllString(js.UrlAddr.string, -1)
 			for _, secret := range tmp {
-				secrets = append(secrets, s.name+" "+secret+" found in URL")
+				secrets = append(secrets, s.name+" "+secret+" found within URL of "+js.UrlAddr.string)
 				l.Log.Debug(s.name + " " + secret + " found within URL of " + js.UrlAddr.string)
 			}
 		}
 		if s.match.MatchString(js.Content) {
 			tmp := s.match.FindAllString(js.Content, -1)
 			for _, secret := range tmp {
-				secrets = append(secrets, s.name+" "+secret+" found in content")
+				secrets = append(secrets, s.name+" "+secret+" found within content of "+js.UrlAddr.string)
 				l.Log.Debug(s.name + " " + secret + " found within content of " + js.UrlAddr.string)
 			}
 		}
