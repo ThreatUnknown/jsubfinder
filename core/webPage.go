@@ -116,7 +116,7 @@ func GetResults(url string) (wp WebPage) {
 		wp.JSFiles[entry.int].Content = entry.string
 
 	}
-	for i, _ = range wp.JSFiles {
+	for i = range wp.JSFiles {
 		if wp.JSFiles[i].Content != "" {
 			err := wp.JSFiles[i].GetSubDomains()
 			if err != nil {
@@ -126,7 +126,7 @@ func GetResults(url string) (wp WebPage) {
 	}
 
 	if FindSecrets {
-		for i, _ = range wp.JSFiles {
+		for i = range wp.JSFiles {
 			if wp.JSFiles[i].Content != "" {
 				err := wp.JSFiles[i].GetSecrets()
 				if err != nil {

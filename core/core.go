@@ -9,19 +9,20 @@ import (
 )
 
 var (
-	InputURLs    []string
-	Threads      int
-	InputFile    string
-	OutputFile   string
-	Greedy       bool
-	Debug        bool = false
-	Crawl        bool
-	FindSecrets  bool
-	Sig          string
-	Silent       bool
-	SSL          bool = false
-	LocalPort    int
-	UpsteamProxy string
+	InputURLs         []string
+	Threads           int
+	InputFile         string
+	OutputFile        string
+	SecretsOutputFile string
+	Greedy            bool
+	Debug             bool = false
+	Crawl             bool
+	FindSecrets       bool = false
+	Sig               string
+	Silent            bool
+	SSL               bool = false
+	LocalPort         int
+	UpsteamProxy      string
 
 	allPages []WebPage
 
@@ -34,7 +35,7 @@ var (
 	Command string
 )
 
-func ExecSearch(outputFile string) error {
+func ExecSearch() error {
 
 	//setup go routine
 	var allPages []WebPage
@@ -74,11 +75,11 @@ func ExecSearch(outputFile string) error {
 			for _, js := range url.JSFiles {                       //For each URL with JS
 				fmt.Println("\tjs: " + js.UrlAddr.string)                           //Print the URL
 				fmt.Println("\t\tcontent length: " + strconv.Itoa(len(js.Content))) // Print the content length
-				for subdomain, _ := range js.subdomains {                           //print the subdomain found in the js
+				for subdomain := range js.subdomains {                              //print the subdomain found in the js
 					fmt.Println("\t\tsubdomain: " + subdomain)
 
 				}
-				for secret, _ := range js.secrets {
+				for secret := range js.secrets {
 					fmt.Println("\t\tsecret: " + secret)
 
 				}
@@ -86,33 +87,33 @@ func ExecSearch(outputFile string) error {
 		}
 	} else { //if not debug mode print subdomains & secrets
 		var tmp []string
-		for subdomain, _ := range newSubdomains {
+		for subdomain := range newSubdomains {
 			if !Silent {
 				fmt.Println(subdomain)
 			}
-			if outputFile != "" {
+			if OutputFile != "" {
 				tmp = append(tmp, subdomain)
 			}
 
 		}
-		if outputFile != "" {
-			err := SaveResults(outputFile, tmp)
+		if OutputFile != "" {
+			err := SaveResults(OutputFile, tmp)
 			if err != nil {
 				l.Log.Error(err)
 			}
 		}
 		if FindSecrets {
 			var tmp []string
-			for secret, _ := range newSecrets {
+			for secret := range newSecrets {
 				if !Silent {
 					fmt.Println(secret)
 				}
-				if outputFile != "" {
+				if SecretsOutputFile != "" {
 					tmp = append(tmp, secret)
 				}
 			}
-			if outputFile != "" {
-				err := SaveResults("secrets_"+outputFile, tmp)
+			if SecretsOutputFile != "" {
+				err := SaveResults(SecretsOutputFile, tmp)
 				if err != nil {
 					l.Log.Error(err)
 				}

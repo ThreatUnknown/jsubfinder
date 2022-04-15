@@ -44,7 +44,7 @@ var searchExec = &cobra.Command{
 		if C.Debug {
 			defer core.TimeTrack(time.Now(), "searchExec")
 		}
-		C.ExecSearch(C.OutputFile) //Start the search
+		C.ExecSearch() //Start the search
 	},
 }
 

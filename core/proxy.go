@@ -139,14 +139,14 @@ func StartProxy(port string, upsteamProxySet bool) (err error) {
 			return err
 		}
 		subDomainlogger = log.New(f, "", 0)
+	}
 
-		if FindSecrets {
-			f, err := os.OpenFile("secrets_"+OutputFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-			if err != nil {
-				return err
-			}
-			secretsLogger = log.New(f, "", 0)
+	if FindSecrets {
+		f, err := os.OpenFile(SecretsOutputFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			return err
 		}
+		secretsLogger = log.New(f, "", 0)
 	}
 
 	fmt.Println("Proxy started on", port)
@@ -177,7 +177,7 @@ func ParseProxyResponse(js JavaScript) {
 			return
 		}
 	}
-	for subdomain, _ := range js.subdomains {
+	for subdomain := range js.subdomains {
 		if IsNewSubdomain(subdomain) {
 			if !Silent {
 				fmt.Println("Subdomain: " + subdomain)
@@ -188,7 +188,7 @@ func ParseProxyResponse(js JavaScript) {
 			}
 		}
 	}
-	for secret, _ := range js.secrets {
+	for secret := range js.secrets {
 		if IsNewSecret(secret) {
 			if PrintSecrets {
 				fmt.Println(secret + " of " + js.UrlAddr.string)

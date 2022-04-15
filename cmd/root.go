@@ -26,10 +26,11 @@ func init() {
 	rootCmd.AddCommand(searchExec)
 	rootCmd.AddCommand(proxyExec)
 
-	rootCmd.PersistentFlags().StringVarP(&C.OutputFile, "outputFile", "o", "", "name/location to store the file")
+	rootCmd.PersistentFlags().StringVarP(&C.OutputFile, "output-file", "o", "", "name/location to store the file")
+	rootCmd.PersistentFlags().StringVarP(&C.SecretsOutputFile, "secrets", "s", "", "name/location to store the secrets")
+	rootCmd.Flag("secrets").NoOptDefVal = "abcdefg.xyz123"
 	rootCmd.PersistentFlags().BoolVarP(&C.Debug, "debug", "d", false, "Enable debug mode. Logs are stored in log.info")
 
-	rootCmd.PersistentFlags().BoolVarP(&C.FindSecrets, "secrets", "s", false, "Check results for secrets e.g api keys")
 	rootCmd.PersistentFlags().BoolVarP(&C.Silent, "silent", "S", false, "Disable printing to the console")
 	rootCmd.PersistentFlags().StringVar(&C.Sig, "sig", "", "Location of signatures for finding secrets")
 	rootCmd.PersistentFlags().BoolVarP(&C.SSL, "nossl", "K", true, "Skip SSL cert verification")
@@ -79,7 +80,15 @@ func safetyChecks() error {
 	}
 
 	//ensure signature file exists
-	if C.FindSecrets {
+	if rootCmd.Flags().Changed("secrets") {
+		C.FindSecrets = true
+		if C.SecretsOutputFile == "abcdefg.xyz123" {
+			if C.OutputFile == "" {
+				C.SecretsOutputFile = "secrets.txt"
+			} else {
+				C.SecretsOutputFile = "secrets_" + C.OutputFile
+			}
+		}
 		if C.Sig == "" {
 			home, err := homedir.Dir()
 			if err != nil {
