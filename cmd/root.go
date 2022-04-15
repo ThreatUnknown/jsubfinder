@@ -27,8 +27,7 @@ func init() {
 	rootCmd.AddCommand(proxyExec)
 
 	rootCmd.PersistentFlags().StringVarP(&C.OutputFile, "output-file", "o", "", "name/location to store the file")
-	rootCmd.PersistentFlags().StringVarP(&C.SecretsOutputFile, "secrets", "s", "", "name/location to store the secrets")
-	rootCmd.Flag("secrets").NoOptDefVal = "abcdefg.xyz123"
+	rootCmd.PersistentFlags().StringVarP(&C.SecretsOutputFile, "secrets", "s", "test123.txt", "name/location to store the secrets")
 	rootCmd.PersistentFlags().BoolVarP(&C.Debug, "debug", "d", false, "Enable debug mode. Logs are stored in log.info")
 
 	rootCmd.PersistentFlags().BoolVarP(&C.Silent, "silent", "S", false, "Disable printing to the console")
@@ -82,13 +81,7 @@ func safetyChecks() error {
 	//ensure signature file exists
 	if rootCmd.Flags().Changed("secrets") {
 		C.FindSecrets = true
-		if C.SecretsOutputFile == "abcdefg.xyz123" {
-			if C.OutputFile == "" {
-				C.SecretsOutputFile = "secrets.txt"
-			} else {
-				C.SecretsOutputFile = "secrets_" + C.OutputFile
-			}
-		}
+
 		if C.Sig == "" {
 			home, err := homedir.Dir()
 			if err != nil {
