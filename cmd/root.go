@@ -73,6 +73,11 @@ func safetyChecks() error {
 		file.Close()
 	}
 
+	//Ensure output and secret file aren't the same
+	if C.OutputFile == C.SecretsOutputFile {
+		return errors.New("The output file for the results and secrets can't be the same")
+	}
+
 	//Ensure you don't provide both url and input file
 	if C.InputFile != "" && len(C.InputURLs) != 0 {
 		return errors.New("Provide either -f or -u, you can't provide both")
