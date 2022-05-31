@@ -78,10 +78,10 @@ play.google.com
 
 
 #### With Secrets Enabled
-
+*note `--secrets=""` will save the secret results in a secrets.txt file*
 ```bash
 
-$ echo www.youtube.com | jsubfinder search -s
+$ echo www.youtube.com | jsubfinder search --secrets=""
 www.youtube.com
 youtubei.youtube.com
 payments.youtube.com
@@ -101,9 +101,10 @@ Google Cloud API Key <redacted> found in content of https://www.youtube.com
 Google Cloud API Key <redacted> found in content of https://www.youtube.com
 ```
 
+
 #### Advanced examples
 ```bash
-$ echo www.google.com | jsubfinder search -crawl -s -S -o jsf_google.txt -t 10 -g
+$ echo www.google.com | jsubfinder search -crawl -s "google_secrets.txt" -S -o jsf_google.txt -t 10 -g
 ```
 
 * `-crawl` use the default crawler to crawl pages for other URL's to analyze

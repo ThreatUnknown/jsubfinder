@@ -27,7 +27,7 @@ func init() {
 	rootCmd.AddCommand(proxyExec)
 
 	rootCmd.PersistentFlags().StringVarP(&C.OutputFile, "output-file", "o", "", "name/location to store the file")
-	rootCmd.PersistentFlags().StringVarP(&C.SecretsOutputFile, "secrets", "s", "test123.txt", "name/location to store the secrets")
+	rootCmd.PersistentFlags().StringVarP(&C.SecretsOutputFile, "secrets", "s", "secrets.txt", "name/location to store the secrets, using --secret=\"\" will use the default filename")
 	rootCmd.PersistentFlags().BoolVarP(&C.Debug, "debug", "d", false, "Enable debug mode. Logs are stored in log.info")
 
 	rootCmd.PersistentFlags().BoolVarP(&C.Silent, "silent", "S", false, "Disable printing to the console")
@@ -73,11 +73,6 @@ func safetyChecks() error {
 		file.Close()
 	}
 
-	//Ensure output and secret file aren't the same
-	if C.OutputFile == C.SecretsOutputFile {
-		return errors.New("The output file for the results and secrets can't be the same")
-	}
-
 	//Ensure you don't provide both url and input file
 	if C.InputFile != "" && len(C.InputURLs) != 0 {
 		return errors.New("Provide either -f or -u, you can't provide both")
@@ -112,6 +107,16 @@ func safetyChecks() error {
 		} else {
 			C.PrintSecrets = true
 		}
+
+		if C.SecretsOutputFile == "" {
+			C.SecretsOutputFile = "secrets.txt"
+		}
+
+	}
+
+	//Ensure output and secret file aren't the same
+	if C.OutputFile == C.SecretsOutputFile {
+		return errors.New("The output file for the results and secrets can't be the same")
 	}
 
 	//if silent && debug {
