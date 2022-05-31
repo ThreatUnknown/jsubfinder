@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"regexp/syntax"
 
-	l "github.com/hiddengearz/jsubfinder/core/logger"
+	l "github.com/ThreatUnkown/jsubfinder/core/logger"
 	"gopkg.in/yaml.v3"
 
 	//"strconv"

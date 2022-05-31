@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hiddengearz/jsubfinder/core"
-	C "github.com/hiddengearz/jsubfinder/core"
-	l "github.com/hiddengearz/jsubfinder/core/logger"
+	"github.com/ThreatUnkown/jsubfinder/core"
+	C "github.com/ThreatUnkown/jsubfinder/core"
+	l "github.com/ThreatUnkown/jsubfinder/core/logger"
 	"github.com/spf13/cobra"
 )
 

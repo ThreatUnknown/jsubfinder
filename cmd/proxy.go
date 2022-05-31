@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"strings"
 
-	C "github.com/hiddengearz/jsubfinder/core"
-	l "github.com/hiddengearz/jsubfinder/core/logger"
+	C "github.com/ThreatUnkown/jsubfinder/core"
+	l "github.com/ThreatUnkown/jsubfinder/core/logger"
 	"github.com/spf13/cobra"
 )
 

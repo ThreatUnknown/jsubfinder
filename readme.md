@@ -81,7 +81,7 @@ play.google.com
 
 ```bash
 
-$ echo www.youtube.com | jsubfinder -s
+$ echo www.youtube.com | jsubfinder search -s
 www.youtube.com
 youtubei.youtube.com
 payments.youtube.com

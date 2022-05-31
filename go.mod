@@ -1,4 +1,4 @@
-module github.com/hiddengearz/jsubfinder
+module github.com/ThreatUnkown/jsubfinder
 
 go 1.13
 
@@ -15,5 +15,5 @@ require (
 	golang.org/x/net v0.0.0-20220412020605-290c469a71a5 // indirect
 	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+	gopkg.in/yaml.v3 v3.0.1
 )

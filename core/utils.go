@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	l "github.com/hiddengearz/jsubfinder/core/logger"
+	l "github.com/ThreatUnkown/jsubfinder/core/logger"
 )
 
 //RadFile reads the content of a file and returns it in a slice

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"os"
 
-	C "github.com/hiddengearz/jsubfinder/core"
-	l "github.com/hiddengearz/jsubfinder/core/logger"
+	C "github.com/ThreatUnkown/jsubfinder/core"
+	l "github.com/ThreatUnkown/jsubfinder/core/logger"
 	"github.com/mitchellh/go-homedir"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -13,9 +13,9 @@ import (
 
 var (
 	rootCmd = &cobra.Command{
-		Use:   "JSubFinder",
-		Short: "Agent for the [redacted] project",
-		Long:  `[redacted]`,
+		Use:   "JSubFinder <Command> <Flags>",
+		Short: "jsubfinder searches webpages for javascript & analyzes them for hidden subdomains and secrets (wip).",
+		Long:  `jsubfinder searches webpages for javascript & analyzes them for hidden subdomains and secrets (wip).`,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		},
 	}

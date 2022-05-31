@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	l "github.com/hiddengearz/jsubfinder/core/logger"
+	l "github.com/ThreatUnkown/jsubfinder/core/logger"
 )
 
 type WebPage struct {

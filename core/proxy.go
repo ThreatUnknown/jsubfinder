@@ -12,8 +12,8 @@ import (
 	"os"
 	"strings"
 
+	l "github.com/ThreatUnkown/jsubfinder/core/logger"
 	"github.com/elazarl/goproxy"
-	l "github.com/hiddengearz/jsubfinder/core/logger"
 )
 
 var SSHFolder string

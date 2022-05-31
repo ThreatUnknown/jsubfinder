@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"sync"
 
-	l "github.com/hiddengearz/jsubfinder/core/logger"
+	l "github.com/ThreatUnkown/jsubfinder/core/logger"
 )
 
 var (

@@ -1,6 +1,6 @@
 package main
 
-import "github.com/hiddengearz/jsubfinder/cmd"
+import "github.com/ThreatUnkown/jsubfinder/cmd"
 
 //"strconv"
 
