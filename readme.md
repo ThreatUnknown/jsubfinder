@@ -14,7 +14,7 @@ Install the application and download the signatures needed to find secrets
 
 Using GO:
 ```bash
-go install github.com/hiddengearz/jsubfinder@latest
+go install github.com/ThreatUnkown/jsubfinder
 wget https://raw.githubusercontent.com/ThreatUnkown/jsubfinder/master/.jsf_signatures.yaml && mv .jsf_signatures.yaml ~/.jsf_signatures.yaml
 ```
 
