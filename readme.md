@@ -13,8 +13,9 @@ JSubFinder is a tool writtin in golang to search webpages & javascript for hidde
 Install the application and download the signatures needed to find secrets
 
 Using GO:
+
 ```bash
-go get github.com/ThreatUnkown/jsubfinder
+go install github.com/ThreatUnkown/jsubfinder@latest
 wget https://raw.githubusercontent.com/ThreatUnkown/jsubfinder/master/.jsf_signatures.yaml && mv .jsf_signatures.yaml ~/.jsf_signatures.yaml
 ```
 
