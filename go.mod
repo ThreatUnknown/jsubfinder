@@ -3,7 +3,7 @@ module github.com/ThreatUnkown/jsubfinder
 go 1.13
 
 require (
-	github.com/elazarl/goproxy v0.0.0-20220403042543-a53172b9392e
+	github.com/elazarl/goproxy v0.0.0-20230808193330-2592e75ae04a
 	github.com/elazarl/goproxy/ext v0.0.0-20220403042543-a53172b9392e // indirect
 	github.com/jpillora/go-tld v1.1.1
 	github.com/kr/pretty v0.3.0 // indirect
