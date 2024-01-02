@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ThreatUnkown/jsubfinder/core"
 	C "github.com/ThreatUnkown/jsubfinder/core"
 	l "github.com/ThreatUnkown/jsubfinder/core/logger"
 	"github.com/spf13/cobra"
@@ -42,7 +41,7 @@ var searchExec = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, arguments []string) {
 		if C.Debug {
-			defer core.TimeTrack(time.Now(), "searchExec")
+			defer C.TimeTrack(time.Now(), "searchExec")
 		}
 		C.ExecSearch() //Start the search
 	},
@@ -53,12 +52,12 @@ func getURLs() (err error) {
 	if len(C.InputURLs) != 0 { //if -u isn't empty
 		return
 	} else if C.InputFile != "" { //else if -f isn't empty
-		core.InputURLs, err = core.ReadFile(C.InputFile)
+		C.InputURLs, err = C.ReadFile(C.InputFile)
 		return
 	} else if stat, _ := os.Stdin.Stat(); (stat.Mode() & os.ModeCharDevice) == 0 { //finally try from input being piped (stdin)
 		sc := bufio.NewScanner(os.Stdin)
 		for sc.Scan() {
-			core.InputURLs = append(core.InputURLs, strings.ToLower(sc.Text()))
+			C.InputURLs = append(C.InputURLs, strings.ToLower(sc.Text()))
 		}
 		return
 	} else {
